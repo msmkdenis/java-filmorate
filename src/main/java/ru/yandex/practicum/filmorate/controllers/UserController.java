@@ -11,30 +11,25 @@ import java.util.*;
 @RestController
 @Slf4j
 public class UserController {
-    private final HashMap<Integer, User> usersStorage = new HashMap<>();
-    private final ArrayList<User> users = new ArrayList<>(); // позволит в дальнейшем получать список по запросу
-    private Integer userID = 0;
+    private final Map<Long, User> usersStorage = new HashMap<>();
+    private long userID = 0;
 
-    private Integer calcUserId() {
+    private long calcUserId() {
         userID++;
         return userID;
     }
 
     @GetMapping("/users")
-    public ArrayList<User> findAllUsers() {
-        return users;
+    public List<User> findAllUsers() {
+        return List.copyOf(usersStorage.values());
     }
 
     @PostMapping(value = "/users")
     public User createUser(@RequestBody User user) {
         userGeneralValidation(user);
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        Integer id = calcUserId();
+        long id = calcUserId();
         user.setId(id);
         usersStorage.put(id, user);
-        users.add(user);
         log.info("Добавлен user: {}", user);
         return user;
     }
@@ -46,14 +41,12 @@ public class UserController {
         }
         userGeneralValidation(user);
         log.info("Обновляется старый вариант user: {}", usersStorage.get(user.getId()));
-        users.remove(usersStorage.get(userID)); // удаляем из списка старый user по id
         usersStorage.put(user.getId(), user);
-        users.add(user);
         log.info("Обновленный вариант user: {}", user);
         return user;
     }
 
-    void userGeneralValidation(User user) {
+    private void userGeneralValidation(User user) {
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Неверно указана почта user: " + user);
         }
@@ -62,6 +55,9 @@ public class UserController {
         }
         if (LocalDate.now().isBefore(user.getBirthday())) {
             throw new ValidationException("Неверно указана дата рождения user: " + user);
+        }
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
     }
 
