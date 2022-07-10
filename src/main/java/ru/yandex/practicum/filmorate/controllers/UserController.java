@@ -1,66 +1,70 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.*;
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
+@Validated
 @Slf4j
 public class UserController {
-    private final Map<Long, User> usersStorage = new HashMap<>();
-    private long userID = 0;
+    private final UserService userService;
 
-    private long calcUserId() {
-        userID++;
-        return userID;
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/users")
     public List<User> findAllUsers() {
-        return List.copyOf(usersStorage.values());
+        return userService.findAll();
+    }
+
+    @GetMapping("/users/{id}")
+    public User findUserById(@PathVariable Long id) {
+        return userService.findUserById(id);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> findFriendsOfUserByUserId(@PathVariable Long id) {
+        return userService.findFriendsByUserID(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> findCommonFriendsOfUserByUserId(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.findCommonFriendsOfUserByUserId(id, otherId);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUserById(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 
     @PostMapping(value = "/users")
-    public User createUser(@RequestBody User user) {
-        userGeneralValidation(user);
-        long id = calcUserId();
-        user.setId(id);
-        usersStorage.put(id, user);
-        log.info("Добавлен user: {}", user);
-        return user;
+    public User createUser(@Valid @RequestBody User user) {
+        return userService.addUser(user);
+    }
+
+    @PutMapping(value = "/users/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
     }
 
     @PutMapping(value = "/users")
-    public User updateUser(@RequestBody User user) {
-        if (!usersStorage.containsKey(user.getId())) {
-            throw new ValidationException("Некорректно указан id у user: " + user.getId());
-        }
-        userGeneralValidation(user);
-        log.info("Обновляется старый вариант user: {}", usersStorage.get(user.getId()));
-        usersStorage.put(user.getId(), user);
-        log.info("Обновленный вариант user: {}", user);
-        return user;
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.updateUser(user);
     }
-
-    private void userGeneralValidation(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw new ValidationException("Неверно указана почта user: " + user);
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Неверно указан логин user: " + user);
-        }
-        if (LocalDate.now().isBefore(user.getBirthday())) {
-            throw new ValidationException("Неверно указана дата рождения user: " + user);
-        }
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
-
 }
 
 
