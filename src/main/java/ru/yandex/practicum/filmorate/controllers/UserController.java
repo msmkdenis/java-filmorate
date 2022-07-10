@@ -47,10 +47,10 @@ public class UserController {
     }
 
     private void userGeneralValidation(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw new ValidationException("Неверно указана почта user: " + user);
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             throw new ValidationException("Неверно указан логин user: " + user);
         }
         if (LocalDate.now().isBefore(user.getBirthday())) {

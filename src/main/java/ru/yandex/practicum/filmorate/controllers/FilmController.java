@@ -50,10 +50,10 @@ public class FilmController {
     }
 
     private void filmGeneralValidation(Film film) {
-        if (film.getName().isBlank()) {
+        if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("Неверно указано название film: " + film);
         }
-        if (film.getDescription().length() > 200) {
+        if (film.getDescription() == null || film.getDescription().length() > 200) {
             throw new ValidationException("Превышена длина описания film: " + film);
         }
         if (film.getReleaseDate().isBefore(EARLIEST_RELEASE)) {
