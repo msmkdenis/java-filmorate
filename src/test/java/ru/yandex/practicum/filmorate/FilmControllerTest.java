@@ -4,13 +4,22 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
+import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
 public class FilmControllerTest {
-    private final FilmController filmController = new FilmController();
+    private final FilmStorage filmStorage = new InMemoryFilmStorage();
+    private final UserStorage userStorage = new InMemoryUserStorage();
+    private final FilmService filmService = new FilmService(filmStorage, userStorage);
+    private final FilmController filmController = new FilmController(filmService);
     private final String LONG_DESCRIPTION = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
@@ -79,7 +88,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -92,7 +101,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -105,7 +114,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -118,7 +127,7 @@ public class FilmControllerTest {
                 LocalDate.of(1800, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -131,6 +140,6 @@ public class FilmControllerTest {
                 LocalDate.of(11990, 10, 10),
                 -50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 }
