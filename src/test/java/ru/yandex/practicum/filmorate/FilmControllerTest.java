@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
+import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -87,7 +88,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -100,7 +101,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -113,7 +114,7 @@ public class FilmControllerTest {
                 LocalDate.of(1990, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -126,7 +127,7 @@ public class FilmControllerTest {
                 LocalDate.of(1800, 10, 10),
                 50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 
     @Test
@@ -139,6 +140,6 @@ public class FilmControllerTest {
                 LocalDate.of(11990, 10, 10),
                 -50);
 
-        Assertions.assertThrows(ValidationException.class, () -> filmController.updateFilm(film));
+        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
     }
 }
