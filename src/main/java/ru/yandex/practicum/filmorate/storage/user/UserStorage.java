@@ -17,4 +17,8 @@ public interface UserStorage {
     void deleteUser(long id);
 
     User findUserById(long id);
+
+    Map<Long, User> getUsersStorage();
+
+    void deleteAllUser();
 }

@@ -29,6 +29,7 @@ public class UserControllerTest {
         );
 
         Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
+        userStorage.findAllUsers();
     }
 
     @Test
@@ -43,6 +44,7 @@ public class UserControllerTest {
         );
 
         Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
+        userStorage.findAllUsers();
     }
 
     @Test
@@ -57,6 +59,7 @@ public class UserControllerTest {
         );
 
         Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
+        userStorage.findAllUsers();
     }
 
     @Test
@@ -71,6 +74,7 @@ public class UserControllerTest {
         );
 
         Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
+        userStorage.findAllUsers();
     }
 
     @Test
@@ -85,6 +89,7 @@ public class UserControllerTest {
         );
 
         Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
+        userStorage.findAllUsers();
     }
 
     @Test
@@ -101,5 +106,45 @@ public class UserControllerTest {
         userController.createUser(user);
 
         Assertions.assertEquals(user.getName(), login, "Имя не подтянулось из login");
+        userStorage.findAllUsers();
+    }
+
+    @Test
+    @DisplayName("Проверка общего списка друзей")
+    void findCommonFriendsOfUserByUserId() throws RuntimeException {
+        User user1 = new User (
+                1,
+                "mail@mail",
+                "login",
+                "name1",
+                LocalDate.of(1990,10,10)
+        );
+
+        User user2 = new User (
+                2,
+                "mail@mail",
+                "login",
+                "name2",
+                LocalDate.of(1990,10,10)
+        );
+
+        User user3 = new User (
+                3,
+                "mail@mail",
+                "login",
+                "name3",
+                LocalDate.of(1990,10,10)
+        );
+        userController.createUser(user1);
+        userController.createUser(user2);
+        userController.createUser(user3);
+
+        userController.addFriend(1L,2L);
+        userController.addFriend(1L,3L);
+        userController.addFriend(2L,3L);
+
+        System.out.println(userController.findCommonFriendsOfUserByUserId(1L,2L));
+
+        userStorage.findAllUsers();
     }
 }

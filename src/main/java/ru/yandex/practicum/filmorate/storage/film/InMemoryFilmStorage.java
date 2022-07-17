@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -40,30 +41,41 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film updateFilm(Film film) {
-        if (!filmsStorage.containsKey(film.getId())) {
-            throw new ValidationException("Некорректно указан id у film: " + film);
+        if (filmsStorage.containsKey(film.getId())) {
+            filmGeneralValidation(film);
+            log.info("Обновляется старый вариант film: {}", filmsStorage.get(film.getId()));
+            filmsStorage.put(film.getId(), film);
+            log.info("Обновленный вариант film: {}", film);
+            return film;
+        } else {
+            throw new IncorrectFilmIdException("Некорректно указан id у film: " + film);
         }
-        filmGeneralValidation(film);
-        log.info("Обновляется старый вариант film: {}", filmsStorage.get(film.getId()));
-        filmsStorage.put(film.getId(), film);
-        log.info("Обновленный вариант film: {}", film);
-        return film;
     }
 
     @Override
     public void deleteFilm(long id) {
         if (!filmsStorage.containsKey(id)) {
-            throw new ValidationException("Некорректно указан id");
+            throw new IncorrectFilmIdException("Некорректно указан id");
         }
         filmsStorage.remove(id);
     }
 
     @Override
+    public void deleteAllFilms() {
+        filmsStorage.clear();
+    }
+
+    @Override
     public Film findFilmById(long id) {
         if (!filmsStorage.containsKey(id)) {
-            throw new ValidationException("Некорректно указан id");
+            throw new IncorrectFilmIdException("Некорректно указан id");
         }
         return filmsStorage.get(id);
+    }
+
+    @Override
+    public Map<Long, Film> getFilmStorage() {
+        return filmsStorage;
     }
 
     private void filmGeneralValidation(Film film) {

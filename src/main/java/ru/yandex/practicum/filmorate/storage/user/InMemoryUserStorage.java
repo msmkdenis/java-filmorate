@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -40,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage{
     @Override
     public User updateUser(User user) {
         if (!usersStorage.containsKey(user.getId())) {
-            throw new ValidationException("Некорректно указан id у user: " + user.getId());
+            throw new IncorrectUserIdException("Некорректный ID пользователя");
         }
         userGeneralValidation(user);
         log.info("Обновляется старый вариант user: {}", usersStorage.get(user.getId()));
@@ -60,9 +61,19 @@ public class InMemoryUserStorage implements UserStorage{
     @Override
     public User findUserById(long id) {
         if (!usersStorage.containsKey(id)) {
-            throw new ValidationException("Некорректно указан id");
+            throw new IncorrectUserIdException("Некорректный ID пользователя");
         }
         return usersStorage.get(id);
+    }
+
+    @Override
+    public Map<Long, User> getUsersStorage() {
+        return usersStorage;
+    }
+
+    @Override
+    public void deleteAllUser() {
+        usersStorage.clear();
     }
 
     private void userGeneralValidation(User user) {
