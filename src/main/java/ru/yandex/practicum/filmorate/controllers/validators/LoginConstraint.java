@@ -4,12 +4,10 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-@Target({FIELD})
-@Retention(RUNTIME)
+@Documented
 @Constraint(validatedBy = LoginValidator.class)
+@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface LoginConstraint {
     String message() default "Логин не может быть пустым и содержать пробелы";
 

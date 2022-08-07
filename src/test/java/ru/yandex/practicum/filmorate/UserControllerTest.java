@@ -1,74 +1,114 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.Assertions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controllers.UserController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.yandex.practicum.filmorate.controllers.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public class UserControllerTest {
-    private final UserStorage userStorage = new InMemoryUserStorage();
-    private final UserService userService = new UserService(userStorage);
-    private final UserController userController = new UserController(userService);
 
-    @Test
-    @DisplayName("Создание user с пустым именем")
-    void createUserWithBlankName() throws RuntimeException {
-        String login = "login";
-        User user = new User (
-                1,
-                "mail@mail",
-                login,
-                "",
-                LocalDate.of(1990,10,10)
-        );
-        userController.createUser(user);
+    @Autowired
+    private MockMvc mockMvc;
+    private String userJsonString;
+    private User user;
+    private Gson gson;
 
-        Assertions.assertEquals(user.getName(), login, "Имя не подтянулось из login");
-        userStorage.findAllUsers();
+
+    @BeforeEach
+    public void beforeEach() {
+
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
+
+        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,01,01));
     }
 
     @Test
-    @DisplayName("Проверка общего списка друзей")
-    void findCommonFriendsOfUserByUserId() throws RuntimeException {
-        User user1 = new User (
-                1,
-                "mail@mail",
-                "login",
-                "name1",
-                LocalDate.of(1990,10,10)
-        );
+    @DisplayName("Регистрация пользователя")
+    public void mustCreateUserSuccessfully() throws Exception {
+        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,01,01));
+        userJsonString = gson.toJson(user);
 
-        User user2 = new User (
-                2,
-                "mail@mail",
-                "login",
-                "name2",
-                LocalDate.of(1990,10,10)
-        );
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Danil"));
+    }
 
-        User user3 = new User (
-                3,
-                "mail@mail",
-                "login",
-                "name3",
-                LocalDate.of(1990,10,10)
-        );
-        userController.createUser(user1);
-        userController.createUser(user2);
-        userController.createUser(user3);
+    @Test
+    @DisplayName("Пользователь с логином с пробелами не должен быть зарегистрирован")
+    public void mustReturn400onSpaceLogin() throws Exception {
+        user.setLogin("dolore ullamco");
+        userJsonString = gson.toJson(user);
 
-        userController.addFriend(1L,2L);
-        userController.addFriend(1L,3L);
-        userController.addFriend(2L,3L);
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
 
-        System.out.println(userController.findCommonFriendsOfUserByUserId(1L,2L));
+    @Test
+    @DisplayName("Пользователь с пустым логином не должен быть зарегистрирован")
+    public void mustReturn400onEmptyLogin() throws Exception {
+        user.setLogin("");
+        userJsonString = gson.toJson(user);
 
-        userStorage.findAllUsers();
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Пользователь с пустым именем должен быть зарегистрирован под своим логином")
+    public void mustReturn400onEmptyName() throws Exception {
+        user.setName("");
+        userJsonString = gson.toJson(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("login"));
+    }
+
+    @Test
+    @DisplayName("Пользователь с датой рождения в будущем не должен быть зарегистрирован")
+    public void mustReturn400onFutureBirthday() throws Exception {
+        LocalDate birthday = LocalDate.of(2050,01,01);
+        user.setBirthday(birthday);
+        userJsonString = gson.toJson(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Пользователь с некорректным Id не должен быть зарегистрирован")
+    public void mustReturn400onWrongId() throws Exception {
+        user.setId(-1);
+        userJsonString = gson.toJson(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/users")
+                        .content(userJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }

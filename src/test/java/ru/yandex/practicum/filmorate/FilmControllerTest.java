@@ -1,91 +1,119 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.Assertions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controllers.FilmController;
-import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import ru.yandex.practicum.filmorate.controllers.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public class FilmControllerTest {
-    private final FilmStorage filmStorage = new InMemoryFilmStorage();
-    private final UserStorage userStorage = new InMemoryUserStorage();
-    private final FilmService filmService = new FilmService(filmStorage, userStorage);
-    private final FilmController filmController = new FilmController(filmService);
     private final String LONG_DESCRIPTION = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-            "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss";
+            "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss" +
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-    @Test
-    @DisplayName("Обновление film с некорректным id")
-    void updateFilmWithWrongId() throws RuntimeException {
-        Film film = new Film(
-                -1,
-                "name",
-                "description",
-                LocalDate.of(1990, 10, 10),
-                50);
+    @Autowired
+    private MockMvc mockMvc;
+    private String filmJsonString;
+    private Film film;
+    private Gson gson;
 
-        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
+
+    @BeforeEach
+    public void beforeEach() {
+
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
+
+        film = new Film(1, "Фильм 1", "Описание фильма 1", LocalDate.of(2022, 5, 10), 30);
     }
 
     @Test
-    @DisplayName("Обновление film с пустым именем")
-    void updateFilmWithWrongName() throws RuntimeException {
-        Film film = new Film(
-                1,
-                "",
-                "description",
-                LocalDate.of(1990, 10, 10),
-                50);
+    @DisplayName("Создание фильма")
+    public void mustCreateFilmSuccessfully() throws Exception {
+        film = new Film(1, "Фильм 1", "Описание фильма 1", LocalDate.of(2022, 5, 10), 30);
+        filmJsonString = gson.toJson(film);
 
-        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Фильм 1"));
     }
 
     @Test
-    @DisplayName("Обновление film с именем >  200 символов")
-    void updateFilmWithLongName() throws RuntimeException {
-        Film film = new Film(
-                1,
-                "name",
-                LONG_DESCRIPTION,
-                LocalDate.of(1990, 10, 10),
-                50);
+    @DisplayName("Фильм с пустым именем не должен создаваться")
+    public void mustReturn400onEmptyName() throws Exception {
+        film.setName("");
+        filmJsonString = gson.toJson(film);
 
-        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
-    @DisplayName("Обновление film с датой релиза до 1895.12.28")
-    void updateFilmWithEarlyRelease() throws RuntimeException {
-        Film film = new Film(
-                1,
-                "name",
-                "description",
-                LocalDate.of(1800, 10, 10),
-                50);
+    @DisplayName("Фильм с кол-вом символом в названии > 200 не должен создаваться")
+    public void mustReturn400onLongName() throws Exception {
+        film.setDescription(LONG_DESCRIPTION);
+        filmJsonString = gson.toJson(film);
 
-        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
-    @DisplayName("Обновление film с отрицательной длительностью")
-    void updateFilmWithNegativeDuration() throws RuntimeException {
-        Film film = new Film(
-                1,
-                "name",
-                "description",
-                LocalDate.of(11990, 10, 10),
-                -50);
+    @DisplayName("Фильм с датой релиза до 28.12.1895 не должен создаваться")
+    public void mustReturn400onEarlyRelease() throws Exception {
+        LocalDate date = LocalDate.of(1800,01,01);
+        film.setReleaseDate(date);
+        filmJsonString = gson.toJson(film);
 
-        Assertions.assertThrows(IncorrectFilmIdException.class, () -> filmController.updateFilm(film));
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Фильм с отрицательной длительностью не должен создаваться")
+    public void mustReturn400onNegativeDuration() throws Exception {
+        film.setDuration(-1);
+        filmJsonString = gson.toJson(film);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Фильм с некорректным Id не должен обновляться")
+    public void mustReturn400onWrongIdUpdate() throws Exception {
+        film.setId(-1);
+        filmJsonString = gson.toJson(film);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/films")
+                        .content(filmJsonString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }
