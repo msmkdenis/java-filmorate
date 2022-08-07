@@ -4,15 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-@Slf4j
 @Service
+@Slf4j
 public class UserService {
     private final UserStorage userStorage;
 
@@ -27,8 +29,12 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        userStorage.updateUser(user);
-        return user;
+        if (!userStorage.getUsersStorage().containsKey(user.getId())) {
+            throw new IncorrectUserIdException("Некорректный ID пользователя");
+        } else {
+            userStorage.updateUser(user);
+            return user;
+        }
     }
 
     public List<User> findAll() {
@@ -36,7 +42,11 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
+        if (userStorage.getUsersStorage().containsKey(id)) {
         userStorage.deleteUser(id);
+        }else {
+            throw new ValidationException("Некорректно указан id");
+        }
     }
 
     public void addFriend(Long userId, Long friendToAddId) {
@@ -87,6 +97,7 @@ public class UserService {
     }
 
     public User findUserById(Long id) {
-        return userStorage.findUserById(id);
+        User user = userStorage.findUserById(id);
+        return Optional.ofNullable(user).orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
     }
 }

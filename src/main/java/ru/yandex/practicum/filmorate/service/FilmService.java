@@ -11,10 +11,11 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
@@ -71,12 +72,20 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        filmStorage.updateFilm(film);
-        return film;
+        if (filmStorage.getFilmStorage().containsKey(film.getId())) {
+            filmStorage.updateFilm(film);
+            return film;
+        } else {
+            throw new IncorrectFilmIdException("Некорректно указан id у film: " + film);
+        }
     }
 
     public void deleteFilm(long id) {
-        filmStorage.deleteFilm(id);
+        if (filmStorage.getFilmStorage().containsKey(id)) {
+            filmStorage.deleteFilm(id);
+        } else {
+            throw new IncorrectFilmIdException("Некорректно указан id" + id);
+        }
     }
 
     public List<Film> findAll() {
@@ -84,6 +93,7 @@ public class FilmService {
     }
 
     public Film findFilmById(long id) {
-        return filmStorage.findFilmById(id);
+        Film film = filmStorage.findFilmById(id);
+        return Optional.ofNullable(film).orElseThrow(() -> new IncorrectFilmIdException("Некорректно указан id"));
     }
 }

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.UserController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
@@ -16,81 +15,6 @@ public class UserControllerTest {
     private final UserStorage userStorage = new InMemoryUserStorage();
     private final UserService userService = new UserService(userStorage);
     private final UserController userController = new UserController(userService);
-
-    @Test
-    @DisplayName("Создание user с пустой почтой")
-    void createUserWithBlankMail() throws RuntimeException {
-        User user = new User (
-                1,
-                "",
-                "login",
-                "name",
-                LocalDate.of(1990,10,10)
-        );
-
-        Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
-        userStorage.findAllUsers();
-    }
-
-    @Test
-    @DisplayName("Создание user с почтой без @")
-    void createUserWithWrongMail() throws RuntimeException {
-        User user = new User (
-                1,
-                "mail",
-                "login",
-                "name",
-                LocalDate.of(1990,10,10)
-        );
-
-        Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
-        userStorage.findAllUsers();
-    }
-
-    @Test
-    @DisplayName("Создание user с пустым логином")
-    void createUserWithBlankLogin() throws RuntimeException {
-        User user = new User (
-                1,
-                "mail@mail",
-                "",
-                "name",
-                LocalDate.of(1990,10,10)
-        );
-
-        Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
-        userStorage.findAllUsers();
-    }
-
-    @Test
-    @DisplayName("Создание user с логином с пробелами")
-    void createUserWithLoginSpaces() throws RuntimeException {
-        User user = new User (
-                1,
-                "mail@mail",
-                "login login",
-                "name",
-                LocalDate.of(1990,10,10)
-        );
-
-        Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
-        userStorage.findAllUsers();
-    }
-
-    @Test
-    @DisplayName("Создание user с некорректным днем рождения")
-    void createUserWithWrongBirthday() throws RuntimeException {
-        User user = new User (
-                1,
-                "mail@mail",
-                "login",
-                "name",
-                LocalDate.of(2222,10,10)
-        );
-
-        Assertions.assertThrows(ValidationException.class, () -> userController.createUser(user));
-        userStorage.findAllUsers();
-    }
 
     @Test
     @DisplayName("Создание user с пустым именем")

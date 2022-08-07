@@ -2,11 +2,8 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +27,11 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User createUser(User user) {
-        userGeneralValidation(user);
         long id = calcUserId();
         user.setId(id);
+        if (user.getName().isBlank() || user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         usersStorage.put(id, user);
         log.info("Добавлен user: {}", user);
         return user;
@@ -40,10 +39,6 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User updateUser(User user) {
-        if (!usersStorage.containsKey(user.getId())) {
-            throw new IncorrectUserIdException("Некорректный ID пользователя");
-        }
-        userGeneralValidation(user);
         log.info("Обновляется старый вариант user: {}", usersStorage.get(user.getId()));
         usersStorage.put(user.getId(), user);
         log.info("Обновленный вариант user: {}", user);
@@ -52,17 +47,11 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public void deleteUser(long id) {
-        if (!usersStorage.containsKey(id)) {
-            throw new ValidationException("Некорректно указан id");
-        }
         usersStorage.remove(id);
     }
 
     @Override
     public User findUserById(long id) {
-        if (!usersStorage.containsKey(id)) {
-            throw new IncorrectUserIdException("Некорректный ID пользователя");
-        }
         return usersStorage.get(id);
     }
 
@@ -74,20 +63,5 @@ public class InMemoryUserStorage implements UserStorage{
     @Override
     public void deleteAllUser() {
         usersStorage.clear();
-    }
-
-    private void userGeneralValidation(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw new ValidationException("Неверно указана почта user: " + user);
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidationException("Неверно указан логин user: " + user);
-        }
-        if (LocalDate.now().isBefore(user.getBirthday())) {
-            throw new ValidationException("Неверно указана дата рождения user: " + user);
-        }
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
     }
 }
