@@ -4,14 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -29,12 +25,9 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        if (!userStorage.getUsersStorage().containsKey(user.getId())) {
-            throw new IncorrectUserIdException("Некорректный ID пользователя");
-        } else {
-            userStorage.updateUser(user);
-            return user;
-        }
+        findUserById(user.getId());
+        userStorage.updateUser(user);
+        return user;
     }
 
     public List<User> findAll() {
@@ -42,62 +35,38 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        if (userStorage.getUsersStorage().containsKey(id)) {
+        findUserById(id);
         userStorage.deleteUser(id);
-        }else {
-            throw new ValidationException("Некорректно указан id");
-        }
     }
 
     public void addFriend(Long userId, Long friendToAddId) {
-        if (userStorage.getUsersStorage().containsKey(userId)) {
-            if (userStorage.getUsersStorage().containsKey(friendToAddId)) {
-                userStorage.findUserById(userId).getFriends().add(friendToAddId);
-                userStorage.findUserById(friendToAddId).getFriends().add(userId);
-                log.info("Пользователь {} добавил в друзья пользователя {}", userId, friendToAddId);
-            } else {
-                throw new IncorrectUserIdException("Некорректный ID пользователя");
-            }
-        } else {
-            throw new IncorrectUserIdException("Некорректный ID пользователя");
-        }
+        User user = findUserById(userId);
+        User friend = findUserById(friendToAddId);
+        user.getFriends().add(friendToAddId);
+        friend.getFriends().add(userId);
+        log.info("Пользователь {} добавил в друзья пользователя {}", user.getName(), friend.getName());
     }
 
     public List<User> findFriendsByUserID(Long id) {
-        List<User> friends = new ArrayList<>();
-        if (userStorage.getUsersStorage().containsKey(id)) {
-            if (!userStorage.getUsersStorage().get(id).getFriends().isEmpty()) {
-                for (long idFriend : userStorage.getUsersStorage().get(id).getFriends()) {
-                    friends.add(userStorage.getUsersStorage().get(idFriend));
-                } return friends;
-            } return null;
-        } else {
-            throw new IncorrectUserIdException("Некорректный ID пользователя");
-        }
+        User user = findUserById(id);
+        return userStorage.findFriends(user);
     }
 
     public List<User> findCommonFriendsOfUserByUserId(Long id, Long otherID) {
-        List<User> commonFriends = new ArrayList<>();
-        Set<Long> userFriends = userStorage.getUsersStorage().get(id).getFriends();
-        Set<Long> otherUserFriends = userStorage.getUsersStorage().get(otherID).getFriends();
-        for (Long elem : userFriends) {
-            for (Long otherElem : otherUserFriends) {
-                if (elem.equals(otherElem)) {
-                    commonFriends.add(userStorage.getUsersStorage().get(elem));
-                }
-            }
-        }
-        return commonFriends;
+        User user = findUserById(id);
+        User otherUser = findUserById(otherID);
+        return userStorage.findCommonFriends(user, otherUser);
     }
 
-    public void deleteFriend(Long userId, Long friendToAddId) {
-        userStorage.findUserById(userId).getFriends().remove(friendToAddId);
-        userStorage.findUserById(friendToAddId).getFriends().remove(userId);
-        log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendToAddId);
+    public void deleteFriend(Long userId, Long friendToRemoveId) {
+        User user = findUserById(userId);
+        User friendToRemove = findUserById(friendToRemoveId);
+        user.getFriends().remove(friendToRemoveId);
+        friendToRemove.getFriends().remove(userId);
+        log.info("Пользователь {} удалил из друзей пользователя {}", user.getName(), friendToRemove.getName());
     }
 
     public User findUserById(Long id) {
-        User user = userStorage.findUserById(id);
-        return Optional.ofNullable(user).orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
+        return userStorage.findUserById(id).orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
     }
 }

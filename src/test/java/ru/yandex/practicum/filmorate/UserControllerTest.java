@@ -27,20 +27,19 @@ public class UserControllerTest {
     private User user;
     private Gson gson;
 
-
     @BeforeEach
     public void beforeEach() {
 
         gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
 
-        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,01,01));
+        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,1,1));
     }
 
     @Test
     @DisplayName("Регистрация пользователя")
     public void mustCreateUserSuccessfully() throws Exception {
-        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,01,01));
+        user = new User(1, "some@email", "login", "Danil", LocalDate.of(1990,1,1));
         userJsonString = gson.toJson(user);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
@@ -90,7 +89,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("Пользователь с датой рождения в будущем не должен быть зарегистрирован")
     public void mustReturn400onFutureBirthday() throws Exception {
-        LocalDate birthday = LocalDate.of(2050,01,01);
+        LocalDate birthday = LocalDate.of(2050,1,1);
         user.setBirthday(birthday);
         userJsonString = gson.toJson(user);
 

@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -53,13 +54,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film findFilmById(long id) {
-        return filmsStorage.get(id);
+    public Optional<Film> findFilmById(long id) {
+        return Optional.ofNullable(filmsStorage.get(id));
     }
-
-    @Override
-    public Map<Long, Film> getFilmStorage() {
-        return filmsStorage;
-    }
-
 }

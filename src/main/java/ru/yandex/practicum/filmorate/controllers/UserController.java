@@ -14,7 +14,7 @@ import java.util.List;
 @Validated
 @Slf4j
 public class UserController {
-    UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {

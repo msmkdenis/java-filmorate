@@ -83,7 +83,7 @@ public class FilmControllerTest {
     @Test
     @DisplayName("Фильм с датой релиза до 28.12.1895 не должен создаваться")
     public void mustReturn400onEarlyRelease() throws Exception {
-        LocalDate date = LocalDate.of(1800,01,01);
+        LocalDate date = LocalDate.of(1800,1,1);
         film.setReleaseDate(date);
         filmJsonString = gson.toJson(film);
 
