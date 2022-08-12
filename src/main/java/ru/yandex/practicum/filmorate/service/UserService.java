@@ -1,72 +1,76 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
 
 import java.util.List;
 
 @Service
 @Slf4j
 public class UserService {
-    private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    private final UserStorageDao userStorageDao;
+    private final FriendshipStorageDao friendshipStorageDao;
+
+    public UserService(UserStorageDao userStorageDao, FriendshipStorageDao friendshipStorageDao) {
+        this.userStorageDao = userStorageDao;
+        this.friendshipStorageDao = friendshipStorageDao;
     }
 
     public User addUser(User user) {
-        userStorage.createUser(user);
-        return user;
+        return userStorageDao.add(user).get();
     }
 
     public User updateUser(User user) {
         findUserById(user.getId());
-        userStorage.updateUser(user);
-        return user;
+        userStorageDao.update(user);
+        return userStorageDao.update(user).get();
+    }
+
+    public User findUserById(Long id) {
+        return userStorageDao.findById(id).
+                orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
     }
 
     public List<User> findAll() {
-        return userStorage.findAllUsers();
+        return userStorageDao.findAll();
     }
 
     public void deleteUser(Long id) {
         findUserById(id);
-        userStorage.deleteUser(id);
+        log.info("Удаляется user {}", id);
+        userStorageDao.deleteById(id);
     }
 
-    public void addFriend(Long userId, Long friendToAddId) {
-        User user = findUserById(userId);
-        User friend = findUserById(friendToAddId);
-        user.getFriends().add(friendToAddId);
-        friend.getFriends().add(userId);
-        log.info("Пользователь {} добавил в друзья пользователя {}", user.getName(), friend.getName());
+    public void addFriend(Long id, Long friendId) {
+        User user = findUserById(id);
+        User friend = findUserById(friendId);
+        Friendship friendship = new Friendship(user, friend);
+        friendshipStorageDao.addFriend(friendship);
+        log.info("User {} добавил в друзья user {}", user.getName(), friend.getName());
+    }
+
+    public void deleteFriend(Long id, Long friendId) {
+        User user = findUserById(id);
+        User friend = findUserById(friendId);
+        Friendship friendship = new Friendship(user, friend);
+        friendshipStorageDao.removeFriend(friendship);
+        log.info("User {} удалил из друзей user {}", user.getName(), friend.getName());
     }
 
     public List<User> findFriendsByUserID(Long id) {
-        User user = findUserById(id);
-        return userStorage.findFriends(user);
+        findUserById(id);
+        return friendshipStorageDao.findUserFriends(id);
     }
 
-    public List<User> findCommonFriendsOfUserByUserId(Long id, Long otherID) {
-        User user = findUserById(id);
-        User otherUser = findUserById(otherID);
-        return userStorage.findCommonFriends(user, otherUser);
-    }
-
-    public void deleteFriend(Long userId, Long friendToRemoveId) {
-        User user = findUserById(userId);
-        User friendToRemove = findUserById(friendToRemoveId);
-        user.getFriends().remove(friendToRemoveId);
-        friendToRemove.getFriends().remove(userId);
-        log.info("Пользователь {} удалил из друзей пользователя {}", user.getName(), friendToRemove.getName());
-    }
-
-    public User findUserById(Long id) {
-        return userStorage.findUserById(id).orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
+    public List<User> findMutualFriends(Long id, Long otherId) {
+        findUserById(id);
+        findUserById(otherId);
+        return friendshipStorageDao.findMutualFriends(id, otherId);
     }
 }

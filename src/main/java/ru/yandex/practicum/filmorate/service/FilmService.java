@@ -1,74 +1,95 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class FilmService {
-    private final FilmStorage filmStorage;
-    private final UserService userService;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
-        this.filmStorage = filmStorage;
+    private final FilmStorageDao filmStorageDao;
+    private final UserService userService;
+    private final LikeStorageDao likeStorageDao;
+    private final GenreStorageDao genreStorageDao;
+
+    public FilmService(
+            FilmStorageDao filmStorageDao,
+            UserService userService,
+            LikeStorageDao likeStorageDao,
+            GenreStorageDao genreStorageDao
+    ) {
+        this.filmStorageDao = filmStorageDao;
         this.userService = userService;
+        this.likeStorageDao = likeStorageDao;
+        this.genreStorageDao = genreStorageDao;
     }
 
     public Film addFilm(Film film) {
-        filmStorage.addFilm(film);
+        filmStorageDao.add(film);
+        Set<Genre> genres = genreStorageDao.findFilmGenres(film.getId());
+        film.setGenres(genres);
+        log.info("Добавлен film {}", film.getName());
         return film;
     }
 
-    public void addLike(Long filmId, Long userId) {
-        Film film = findFilmById(filmId);
-        User user = userService.findUserById(userId);
-        film.getUsersLikes().add(userId);
-        film.setLikes(film.getUsersLikes().size());
-        log.info("Пользователь {} поставил лайк фильму {}", user, film);
-    }
-
-    public void deleteLike(Long filmId, Long userId) {
-        Film film = findFilmById(filmId);
-        User user = userService.findUserById(userId);
-        film.getUsersLikes().remove(userId);
-        film.setLikes(film.getUsersLikes().size());
-        log.info("Пользователь {} удалил лайк у фильма {}", user, film);
-    }
-
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.findAllFilms().stream()
-                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
-                .distinct()
-                .limit(count)
-                .collect(Collectors.toList());
+    public Film findFilmById(long id) {
+        Film film = filmStorageDao.findById(id).
+                orElseThrow(() -> new IncorrectFilmIdException("Некорректно указан id"));
+        Set<Genre> genres = genreStorageDao.findFilmGenres(id);
+        film.setGenres(genres);
+        return film;
     }
 
     public Film updateFilm(Film film) {
         findFilmById(film.getId());
-        filmStorage.updateFilm(film);
-        return film;
+        return filmStorageDao.update(film).get();
+    }
+
+    public List<Film> findAll() {
+        List<Film> films = filmStorageDao.findAll();
+        List<Film> updatedFilms = new ArrayList<>();
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            updatedFilms.add(film);
+        }
+        return updatedFilms;
     }
 
     public void deleteFilm(long id) {
         findFilmById(id);
-        filmStorage.deleteFilm(id);
+        log.info("Уадляется film {}", id);
+        filmStorageDao.deleteById(id);
     }
 
-    public List<Film> findAll() {
-        return filmStorage.findAllFilms();
+    public void addLike(Long filmId, Long userId) {
+        User user = userService.findUserById(userId);
+        Film film = findFilmById(filmId);
+        Like like = new Like(user, film);
+        likeStorageDao.addLike(like);
+        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
     }
 
-    public Film findFilmById(long id) {
-        return filmStorage.findFilmById(id).orElseThrow(() -> new IncorrectFilmIdException("Некорректно указан id"));
+    public void deleteLike(Long filmId, Long userId) {
+        User user = userService.findUserById(userId);
+        Film film = findFilmById(filmId);
+        Like like = new Like(user, film);
+        likeStorageDao.deleteLike(like);
+        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
+    }
+
+    public List<Film> findPopularFilms(Integer count) {
+        return likeStorageDao.findPopularFilms(count);
     }
 }
