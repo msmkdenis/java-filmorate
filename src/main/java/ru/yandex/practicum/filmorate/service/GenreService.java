@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.IncorrectGenreIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
@@ -24,6 +25,6 @@ public class GenreService {
 
     public Genre findById(Long id) {
         return genreStorageDao.findById(id).
-                orElseThrow(() -> new IncorrectUserIdException("Некорректный ID жанра"));
+                orElseThrow(() -> new IncorrectGenreIdException("Некорректный ID жанра"));
     }
 }
