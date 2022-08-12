@@ -22,21 +22,6 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping("/films")
-    public List<Film> findAllFilms() {
-        return filmService.findAll();
-    }
-
-    @GetMapping("/films/{id}")
-    public Film findFilmById(@PathVariable Long id) {
-        return filmService.findFilmById(id);
-    }
-
-    @DeleteMapping("/films/{id}")
-    public void deleteFilmByID(@PathVariable Long id) {
-        filmService.deleteFilm(id);
-    }
-
     @PostMapping(value = "/films")
     public Film createFilm(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);
@@ -47,19 +32,36 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
+    @GetMapping(value = "/films/{id}")
+    public Film findFilmById(@PathVariable Long id) {
+        return filmService.findFilmById(id);
+    }
+
+    @GetMapping(value = "/films")
+    public List<Film> findAllFilms() {
+        return filmService.findAll();
+    }
+
+    @DeleteMapping(value = "/films/{id}")
+    public void deleteFilmByID(@PathVariable Long id) {
+        filmService.deleteFilm(id);
+    }
+
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+    public void addLike(@PathVariable("id") Long id,
+                        @PathVariable("userId") Long userId) {
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
-    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+    @DeleteMapping(value = "/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable("id") Long id,
+                           @PathVariable("userId") Long userId) {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10")  @Positive int count) {
-        return filmService.getPopularFilms(count);
+    @GetMapping(value = "/films/popular")
+    public List<Film> findPopularFilms(@RequestParam(defaultValue = "10", required = false) @Positive Integer count) {
+        return filmService.findPopularFilms(count);
     }
 }
 

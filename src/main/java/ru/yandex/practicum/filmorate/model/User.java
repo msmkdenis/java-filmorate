@@ -1,6 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.controllers.validators.LoginConstraint;
 
 import javax.validation.constraints.Email;
@@ -9,10 +13,10 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
-public class User {
-
-    private long id;
+@Getter
+@Setter
+@NoArgsConstructor
+public class User extends BaseEntity{
 
     @Email(message = "E-mail не должен быть пустым и должен содержать символ @")
     private String email;
@@ -23,12 +27,18 @@ public class User {
     private String name;
 
     @Past(message = "Дата дня рождения не может быть в будущем")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
-    private Set<Long> friends = new HashSet<>();
+    public User(Long id, String email, String login, String name, LocalDate birthday) {
+        super(id);
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
 
-    public User(long id, String email, String login, String name, LocalDate birthday) {
-        this.id = id;
+    public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
         this.name = name;
