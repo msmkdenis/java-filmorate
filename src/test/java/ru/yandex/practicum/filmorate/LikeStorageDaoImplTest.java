@@ -80,18 +80,21 @@ public class LikeStorageDaoImplTest {
 
         likeStorageDao.addLike(like);
 
-        assertEquals(secondFilm.getId(), likeStorageDao.findPopularFilms(5).get(0));
+        assertEquals(2, likeStorageDao.findPopularFilms(5).size());
+        assertEquals(secondFilm.getId(), likeStorageDao.findPopularFilms(5).get(0).getId());
         userStorageDao.deleteById(userAddLike.getId());
     }
 
     @Test
     @DisplayName("Получение пуплярных film")
     void findPopularFilmsTest() {
-        Film film1 = createFirstFilm();
-        Film film2 = createSecondFilm();
-        filmStorageDao.add(film1);
-        filmStorageDao.add(film2);
+        Film firstFilm = createFirstFilm();
+        Film secondFilm = createSecondFilm();
+        filmStorageDao.add(firstFilm);
+        filmStorageDao.add(secondFilm);
 
         assertFalse(likeStorageDao.findPopularFilms(10).isEmpty());
+        filmStorageDao.deleteById(firstFilm.getId());
+        filmStorageDao.deleteById(secondFilm.getId());
     }
 }

@@ -69,7 +69,7 @@ public class FriendshipStorageDaoImplTest {
 
         assertFalse(friendshipStorageDao.findUserFriends(firstUser.getId()).isEmpty());
         assertTrue(friendshipStorageDao.findUserFriends(secondUser.getId()).isEmpty());
-        assertEquals(secondUser.getId(), friendshipStorageDao.findUserFriends(firstUser.getId()).get(0));
+        assertEquals(secondUser.getId(), friendshipStorageDao.findUserFriends(firstUser.getId()).get(0).getId());
 
         userStorageDao.deleteById(firstUser.getId());
         userStorageDao.deleteById(secondUser.getId());

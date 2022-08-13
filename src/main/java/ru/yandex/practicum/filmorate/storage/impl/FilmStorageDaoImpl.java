@@ -45,16 +45,7 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
             return stmt;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-        if (isNull(film.getGenres()) || film.getGenres().isEmpty()) {
-            return findById(keyHolder.getKey().longValue());
-        } else {
-            for (Genre genre : film.getGenres()) {
-                String sql = "INSERT INTO FILM_GENRES (FILM_ID, GENRE_ID) VALUES (?, ?)";
-                jdbcTemplate.update(sql,
-                        film.getId(),
-                        genre.getId());
-            }
-        }
+        filmWithGenres(film).get();
         return findById(keyHolder.getKey().longValue());
     }
 
@@ -69,15 +60,6 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         return films.size() == 0 ?
                 Optional.empty() :
                 Optional.ofNullable(films.get(0));
-    }
-
-    private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {
-        return new Film(rs.getLong("FILM_ID"),
-                rs.getString("FILM_NAME"),
-                rs.getString("DESCRIPTION"),
-                rs.getDate("RELEASE_DATE").toLocalDate(),
-                rs.getInt("DURATION"),
-                new Mpa(rs.getInt("MPA.MPA_ID"), rs.getString("MPA.MPA_NAME")));
     }
 
     @Override
@@ -104,9 +86,22 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                 film.getMpa().getId(),
                 film.getId());
 
+        deleteGenresFromFilm(film);
+        return filmWithGenres(film);
+    }
+
+    @Override
+    public void deleteById(long id) {
+        final String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
+
+    private void deleteGenresFromFilm(Film film) {
         final String deleteGenres = "DELETE FROM FILM_GENRES WHERE FILM_ID = ?";
         jdbcTemplate.update(deleteGenres, film.getId());
+    }
 
+    private Optional<Film> filmWithGenres(Film film) {
         if (isNull(film.getGenres()) || film.getGenres().isEmpty()) {
             return Optional.of(film);
         } else {
@@ -124,9 +119,12 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         return Optional.of(film);
     }
 
-    @Override
-    public void deleteById(long id) {
-        final String sqlQuery = "DELETE FROM FILMS WHERE FILM_ID = ?";
-        jdbcTemplate.update(sqlQuery, id);
+    private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {
+        return new Film(rs.getLong("FILM_ID"),
+                rs.getString("FILM_NAME"),
+                rs.getString("DESCRIPTION"),
+                rs.getDate("RELEASE_DATE").toLocalDate(),
+                rs.getInt("DURATION"),
+                new Mpa(rs.getInt("MPA.MPA_ID"), rs.getString("MPA.MPA_NAME")));
     }
 }

@@ -76,5 +76,6 @@ public class GenreStorageDaoImplTest {
         Set<Genre> filmGenres = genreStorageDao.findFilmGenres(filmGenre.getId());
 
         assertEquals(3, filmGenres.size());
+        filmStorageDao.deleteById(filmGenre.getId());
     }
 }

@@ -81,14 +81,6 @@ public class UserStorageDaoImpl implements UserStorageDao {
                 Optional.ofNullable(users.get(0));
     }
 
-    private User makeLocalUser(ResultSet rs, int rowNum) throws SQLException {
-        return new User(rs.getLong("USER_ID"),
-                rs.getString("EMAIL"),
-                rs.getString("LOGIN"),
-                rs.getString("USER_NAME"),
-                (rs.getDate("BIRTHDAY")).toLocalDate());
-    }
-
     @Override
     public List<User> findAll() {
         final String sqlQuery = "SELECT * FROM USERS";
@@ -99,5 +91,13 @@ public class UserStorageDaoImpl implements UserStorageDao {
     public void deleteById(long id) {
         final String sqlQuery = "DELETE FROM USERS WHERE USER_ID = ?";
         jdbcTemplate.update(sqlQuery, id);
+    }
+
+    private User makeLocalUser(ResultSet rs, int rowNum) throws SQLException {
+        return new User(rs.getLong("USER_ID"),
+                rs.getString("EMAIL"),
+                rs.getString("LOGIN"),
+                rs.getString("USER_NAME"),
+                (rs.getDate("BIRTHDAY")).toLocalDate());
     }
 }

@@ -28,16 +28,16 @@ public class MpaStorageDaoImpl implements MpaStorageDao {
                 Optional.ofNullable(mpa.get(0));
     }
 
+    @Override
+    public List<Mpa> findAll() {
+        final String sqlQuery = "SELECT * FROM MPA";
+        return jdbcTemplate.query(sqlQuery, this::makeLocalMpa);
+    }
+
     private Mpa makeLocalMpa(ResultSet rs, int rowNum) throws SQLException {
         return new Mpa(
                 rs.getInt("MPA_ID"),
                 rs.getString("MPA_NAME")
         );
-    }
-
-    @Override
-    public List<Mpa> findAll() {
-        final String sqlQuery = "SELECT * FROM MPA";
-        return jdbcTemplate.query(sqlQuery, this::makeLocalMpa);
     }
 }

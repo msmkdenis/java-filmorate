@@ -89,10 +89,10 @@ public class FilmService {
     }
 
     public List<Film> findPopularFilms(Integer count) {
-        List<Film> films = new LinkedList<>();
+/*        List<Film> films = new LinkedList<>();
         for (Long id : likeStorageDao.findPopularFilms(count)) {
             films.add(findFilmById(id));
-        }
-        return films;
+        }*/
+        return likeStorageDao.findPopularFilms(count);
     }
 }

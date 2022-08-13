@@ -62,6 +62,7 @@ public class FilmStorageDaoImplTest {
                 .isPresent()
                 .hasValueSatisfying(u ->
                         assertThat(u).hasFieldOrPropertyWithValue("name", "FilmOne"));
+        filmStorageDao.deleteById(testFilm.getId());
     }
 
     @Test
@@ -81,6 +82,7 @@ public class FilmStorageDaoImplTest {
                 .hasValueSatisfying(u ->
                         assertThat(u).hasFieldOrPropertyWithValue("name", "FilmTwo")
                 );
+        filmStorageDao.deleteById(filmToUpdate.getId());
     }
 
     @Test
