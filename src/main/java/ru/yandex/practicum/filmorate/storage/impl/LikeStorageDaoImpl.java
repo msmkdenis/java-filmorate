@@ -5,26 +5,26 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
+import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.MpaStorageDao;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class LikeStorageDaoImpl implements LikeStorageDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaStorageDao mpaStorageDao;
+    private final FilmStorageDao filmStorageDao;
+    private final GenreStorageDao genreStorageDao;
 
-    public LikeStorageDaoImpl(JdbcTemplate jdbcTemplate, MpaStorageDao mpaStorageDao) {
+    public LikeStorageDaoImpl(JdbcTemplate jdbcTemplate, FilmStorageDao filmStorageDao, GenreStorageDao genreStorageDao) {
         this.jdbcTemplate = jdbcTemplate;
-        this.mpaStorageDao = mpaStorageDao;
+        this.filmStorageDao = filmStorageDao;
+        this.genreStorageDao = genreStorageDao;
     }
-
 
     @Override
     public void addLike(Like like) {
@@ -54,19 +54,19 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
                         "LEFT JOIN MPA ON F.MPA_ID = MPA.MPA_ID " +
                         "ORDER BY L.LIKES_COUNT DESC LIMIT ?", count);
 
-        return findFilms(sqlQuery);
+        List<Long> filmId = new LinkedList<>();
+        while (sqlQuery.next()) {
+            Long id = sqlQuery.getLong("FILM_ID");
+            filmId.add(id);
+        }
+        return makeFilmsWithGenres(filmId);
     }
 
-    private List<Film> findFilms(SqlRowSet sqlQuery) {
+    List<Film> makeFilmsWithGenres(List<Long> filmId) {
         List<Film> films = new ArrayList<>();
-        final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        while (sqlQuery.next()) {
-            Film film = new Film(sqlQuery.getLong("FILM_ID"),
-                    sqlQuery.getString("FILM_NAME"),
-                    sqlQuery.getString("DESCRIPTION"),
-                    LocalDate.parse(Objects.requireNonNull(sqlQuery.getString("RELEASE_DATE")), dtf),
-                    sqlQuery.getInt("DURATION"),
-                    mpaStorageDao.findById(sqlQuery.getInt("MPA_ID")).get());
+        for (Long id : filmId) {
+            Film film = filmStorageDao.findById(id).get();
+            film.setGenres(genreStorageDao.findFilmGenres(id));
             films.add(film);
         }
         return films;
