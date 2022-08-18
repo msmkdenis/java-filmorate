@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -42,6 +43,7 @@ public class Film extends BaseEntity {
     private Set<Genre> genres;
 
     private int rate;
+    private List<Director> directors;
 
     public Film(long id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
         super(id);

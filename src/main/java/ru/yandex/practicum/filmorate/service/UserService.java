@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
@@ -34,7 +34,7 @@ public class UserService {
 
     public User findUserById(Long id) {
         return userStorageDao.findById(id).
-                orElseThrow(() -> new IncorrectUserIdException("Некорректный ID пользователя"));
+                orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", id)));
     }
 
     public List<User> findAll() {

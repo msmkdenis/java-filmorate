@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectMpaIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dao.MpaStorageDao;
 
@@ -22,6 +22,6 @@ public class MpaService {
 
     public Mpa findMpaById(int id) {
         return mpaStorageDao.findById(id).
-                orElseThrow(() -> new IncorrectMpaIdException("Некорректный ID рейтинга"));
+                orElseThrow(() -> new NotFoundException(String.format("Рейтинг с id = %s не найден", id)));
     }
 }

@@ -2,10 +2,11 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.matchers.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
@@ -66,7 +67,7 @@ public class UserStorageDaoImplTest {
                 .hasValueSatisfying(u ->
                         assertThat(u).hasFieldOrPropertyWithValue("name", "firstName"));
 
-        assertThrows(IncorrectUserIdException.class, () -> userService.findUserById(-1L));
+        assertThrows(NotFoundException.class, () -> userService.findUserById(-1L));
 
         userStorageDao.deleteById(testUser.getId());
     }
@@ -99,6 +100,6 @@ public class UserStorageDaoImplTest {
         Long userDeleteId = userToDelete.getId();
         userStorageDao.deleteById(userDeleteId);
 
-        assertThrows(IncorrectUserIdException.class, () -> userService.findUserById(userDeleteId));
+        assertThrows(NotFoundException.class, () -> userService.findUserById(userDeleteId));
     }
 }

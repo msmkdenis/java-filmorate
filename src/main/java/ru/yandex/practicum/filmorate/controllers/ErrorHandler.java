@@ -6,10 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectGenreIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectMpaIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.*;
 
 import javax.validation.ConstraintViolationException;
 
@@ -25,23 +22,9 @@ public class ErrorHandler {
      */
 
     @ExceptionHandler
-    public ResponseEntity<String> handleUserNotFoundException(final IncorrectUserIdException e) {
-        return new ResponseEntity<>( e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<String> handleFilmNotFoundException(final IncorrectFilmIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<String> handleMpaNotFoundException(final IncorrectMpaIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<String> handleGenreNotFoundException(final IncorrectGenreIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String>  handleNotFoundException(final NotFoundException e) {
+        log.info("404: {}", e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
