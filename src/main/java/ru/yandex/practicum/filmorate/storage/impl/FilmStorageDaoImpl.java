@@ -15,10 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 
@@ -90,6 +87,10 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                 film.getId());
 
         deleteGenresFromFilm(film);
+
+        final String sqlDelete = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlDelete, film.getId());
+
         return filmWithGenres(film);
     }
 
@@ -120,6 +121,35 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         }
         log.info("Обновлен film {}", film.getId());
         return Optional.of(film);
+    }
+
+    public List<Film> getListFilmsDirector(long id, String sort) {
+        List<Film> films = null;
+        switch (sort) {
+            case "year":
+                final String sql1 = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                        "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                        "FROM FILMS F " +
+                        "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                        "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                        "WHERE FD.DIRECTOR_ID = ? " +
+                        "ORDER BY F.RELEASE_DATE";
+                films = jdbcTemplate.query(sql1, this::makeLocalFilm, id);
+                break;
+            case "likes":
+                final String sql2 = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                        "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                        "FROM FILMS F " +
+                        "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                        "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                        "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                        "WHERE FD.DIRECTOR_ID = ? " +
+                        "GROUP BY F.FILM_ID " +
+                        "ORDER BY COUNT(L.USER_ID)";
+                films = jdbcTemplate.query(sql2, this::makeLocalFilm, id);
+                break;
+        }
+        return films;
     }
 
     private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {

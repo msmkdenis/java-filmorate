@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.IncorrectGenreIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
@@ -58,7 +58,7 @@ public class GenreStorageDaoImplTest {
         Genre genre = genreService.findById(1L);
 
         assertEquals("Комедия", genre.getName());
-        assertThrows(IncorrectGenreIdException.class, ()-> genreService.findById(-1L));
+        assertThrows(NotFoundException.class, ()-> genreService.findById(-1L));
     }
 
     @Test
