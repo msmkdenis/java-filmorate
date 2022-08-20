@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -150,6 +151,66 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                 break;
         }
         return films;
+    }
+
+    @Override
+    public List<Film> findPopularFilms(int count) {
+        final String sql = "SELECT * " +
+                "FROM FILMS F " +
+                "LEFT JOIN " +
+                "(SELECT FILM_ID, " +
+                "COUNT(*) LIKES_COUNT " +
+                "FROM LIKES " +
+                "GROUP BY FILM_ID) " +
+                "L ON F.FILM_ID = L.FILM_ID " +
+                "LEFT JOIN MPA ON F.MPA_ID = MPA.MPA_ID " +
+                "ORDER BY L.LIKES_COUNT DESC LIMIT ?";
+        return jdbcTemplate.query(sql, this::makeLocalFilm, count);
+    }
+
+    @Override
+    public List<Film> findPopularFilmSortedByGenreAndYear(int count, long genreId, int year) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILM_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE G.GENRE_ID = ? AND YEAR(F.RELEASE_DATE) = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeLocalFilm, genreId, year, count));
+        return new ArrayList<>(films);
+    }
+
+    @Override
+    public List<Film> findPopularFilmSortedByGenre(int count, long genreId) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILM_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE G.GENRE_ID = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeLocalFilm, genreId, count));
+        return new ArrayList<>(films);
+    }
+
+    @Override
+    public List<Film> findPopularFilmSortedByYear(int count, int year) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, " +
+                "F.RELEASE_DATE, F.DURATION, M.MPA_ID, M.MPA_NAME, G.GENRE_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON M.MPA_ID = F.MPA_ID " +
+                "LEFT JOIN FILM_GENRES G ON F.FILM_ID = G.FILM_ID " +
+                "LEFT JOIN LIKES L ON G.FILM_ID = L.FILM_ID " +
+                "WHERE YEAR(F.RELEASE_DATE) = ? " +
+                "GROUP BY F.FILM_ID, G.GENRE_ID ORDER BY COUNT(L.USER_ID) DESC " +
+                "LIMIT ?";
+        Set<Film> films = new HashSet<>(jdbcTemplate.query(sql, this::makeLocalFilm, year, count));
+        return new ArrayList<>(films);
     }
 
     private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {

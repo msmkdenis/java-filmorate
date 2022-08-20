@@ -92,8 +92,23 @@ public class FilmService {
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
-    public List<Film> findPopularFilms(Integer count) {
-        return likeStorageDao.findPopularFilms(count);
+    public List<Film> findPopularFilms(int count, long genreId, int year) {
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenreAndYear(count, genreId, year);
+        } else if (genreId != 0 && year == 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenre(count, genreId);
+        } else if (genreId == 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByYear(count, year);
+        } else {
+            films = filmStorageDao.findPopularFilms(count);
+        }
+
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) {

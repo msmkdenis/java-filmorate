@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
 
-import javax.validation.ValidationException;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
