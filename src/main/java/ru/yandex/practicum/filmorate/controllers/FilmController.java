@@ -60,13 +60,16 @@ public class FilmController {
     }
 
     @GetMapping(value = "/films/popular")
-    public List<Film> findPopularFilms(@RequestParam(defaultValue = "10", required = false) @Positive Integer count) {
-        return filmService.findPopularFilms(count);
+    public List<Film> findPopularFilms(@RequestParam(defaultValue = "10", required = false) @Positive Integer count,
+                                       @RequestParam(defaultValue = "0") long genreId,
+                                       @RequestParam(defaultValue = "0") int year) {
+        return filmService.findPopularFilms(count, genreId, year);
     }
 
     @GetMapping("/films/director/{directorId}")
     public List<Film> getListFilmsDirector(@PathVariable long directorId, @RequestParam String sortBy) {
         return filmService.getListFilmsDirector(directorId, sortBy);
     }
+
 }
 

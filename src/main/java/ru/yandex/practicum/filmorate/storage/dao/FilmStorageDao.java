@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface FilmStorageDao extends BaseStorageDao<Film> {
     List<Film> getListFilmsDirector(long id, String sort);
+    List<Film> findPopularFilms(int count);
+    List<Film> findPopularFilmSortedByGenreAndYear(int count, long genreId, int year);
+    List<Film> findPopularFilmSortedByGenre(int count, long genreId);
+    List<Film> findPopularFilmSortedByYear(int count, int year);
 }
