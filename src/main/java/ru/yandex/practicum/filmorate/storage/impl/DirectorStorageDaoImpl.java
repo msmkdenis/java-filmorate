@@ -6,13 +6,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -89,6 +87,6 @@ public class DirectorStorageDaoImpl implements DirectorStorageDao {
     }
 
     private Director makeDirector(ResultSet rs, int rowNum) throws SQLException {
-        return new Director(rs.getLong("director_id"), rs.getString("name"));
+        return new Director(rs.getLong("DIRECTOR_ID"), rs.getString("NAME"));
     }
 }

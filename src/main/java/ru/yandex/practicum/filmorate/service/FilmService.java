@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Like;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
@@ -15,7 +18,6 @@ import java.util.Set;
 @Service
 @Slf4j
 public class FilmService {
-
     private final FilmStorageDao filmStorageDao;
     private final UserService userService;
     private final LikeStorageDao likeStorageDao;
@@ -41,7 +43,7 @@ public class FilmService {
         Set<Genre> genres = genreStorageDao.findFilmGenres(film.getId());
         film.setGenres(genres);
         directorStorageDao.setFilmDirector(film);
-        log.info("Добавлен film {}", film.getName());
+        log.info("Добавлен фильм {}", film.getName());
         return film;
     }
 
@@ -72,7 +74,7 @@ public class FilmService {
 
     public void deleteFilm(long id) {
         findFilmById(id);
-        log.info("Уадляется film {}", id);
+        log.info("Фильм с id = {} удалён", id);
         filmStorageDao.deleteById(id);
     }
 
