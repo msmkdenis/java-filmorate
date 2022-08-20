@@ -15,7 +15,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
 
@@ -90,7 +93,6 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
 
         final String sqlDelete = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlDelete, film.getId());
-
         return filmWithGenres(film);
     }
 
