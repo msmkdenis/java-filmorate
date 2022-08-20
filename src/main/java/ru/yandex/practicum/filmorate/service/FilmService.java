@@ -93,6 +93,10 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> findMutualFilms(long userId, long friendId) {
+        return filmStorageDao.findMutualFilms(userId, friendId);
+    }
+
     public List<Film> getListFilmsDirector(long id, String sort) {
         if (directorStorageDao.findById(id).isEmpty()) {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
