@@ -68,5 +68,11 @@ public class FilmController {
     public List<Film> getListFilmsDirector(@PathVariable long directorId, @RequestParam String sortBy) {
         return filmService.getListFilmsDirector(directorId, sortBy);
     }
+
+    @GetMapping(value = "/films/search")
+    public List<Film> searchFilms(@RequestParam("query") String query,
+                                      @RequestParam("by") String by) {
+        return null;
+    }
 }
 

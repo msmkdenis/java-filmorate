@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface FilmStorageDao extends BaseStorageDao<Film> {
     List<Film> getListFilmsDirector(long id, String sort);
+    List<Film> searchFilms(String query, String by);
 }

@@ -107,4 +107,14 @@ public class FilmService {
         }
         return films;
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        if (query == null || by == null) {
+            return findPopularFilms(findAll().size());
+        } else if (by.equals("director") || by.equals("title") || by.equals("director,title") || by.equals("title,director")) {
+            return filmStorageDao.searchFilms(query, by);
+        } else {
+            return null;
+        }
+    }
 }
