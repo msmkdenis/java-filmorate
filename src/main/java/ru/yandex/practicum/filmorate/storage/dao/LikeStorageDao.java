@@ -12,4 +12,6 @@ public interface LikeStorageDao {
     void deleteLike(Like like);
 
     List<Film> findPopularFilms(Integer count);
+
+    List<Film> filmRecommendations(Long id);
 }
