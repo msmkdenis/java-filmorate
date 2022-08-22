@@ -11,4 +11,5 @@ public interface FilmStorageDao extends BaseStorageDao<Film> {
     List<Film> findPopularFilmSortedByGenre(int count, long genreId);
     List<Film> findPopularFilmSortedByYear(int count, int year);
     List<Film> findMutualFilms(long userId, long friendId);
+    List<Film> searchFilms(String query, String by);
 }

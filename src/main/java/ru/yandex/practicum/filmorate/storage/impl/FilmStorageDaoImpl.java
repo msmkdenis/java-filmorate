@@ -217,6 +217,18 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         return jdbcTemplate.query(sql, this::makeLocalFilm, userId, friendId);
     }
 
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+            return null;
+    }
+
+    private List<Film> searchFilmsByTitle(String query, String by) {
+
+    }
+
+    private List<Film> searchFilmsByDirector(String query, String by) {
+
+    }
     private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {
         return new Film(rs.getLong("FILM_ID"),
                 rs.getString("FILM_NAME"),
