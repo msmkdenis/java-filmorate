@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
 
 import java.util.List;
@@ -16,10 +18,13 @@ public class UserService {
 
     private final UserStorageDao userStorageDao;
     private final FriendshipStorageDao friendshipStorageDao;
+    private final LikeStorageDao likeStorageDao;
 
-    public UserService(UserStorageDao userStorageDao, FriendshipStorageDao friendshipStorageDao) {
+    public UserService(UserStorageDao userStorageDao, FriendshipStorageDao friendshipStorageDao,
+                       LikeStorageDao likeStorageDao) {
         this.userStorageDao = userStorageDao;
         this.friendshipStorageDao = friendshipStorageDao;
+        this.likeStorageDao = likeStorageDao;
     }
 
     public User addUser(User user) {
@@ -72,5 +77,9 @@ public class UserService {
         findUserById(id);
         findUserById(otherId);
         return friendshipStorageDao.findMutualFriends(id, otherId);
+    }
+    public List<Film> filmRecommendations(Long id) {
+        findUserById(id);
+        return likeStorageDao.filmRecommendations(id);
     }
 }

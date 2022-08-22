@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -68,6 +69,10 @@ public class UserController {
     public List<User>  findMutualFriends(@PathVariable("id") Long id,
                                      @PathVariable("otherId") Long otherId) {
         return userService.findMutualFriends(id, otherId);
+    }
+    @GetMapping("/users/{id}/recommendations")
+    public List<Film> filmRecommendations(@PathVariable("id") Long id) {
+        return userService.filmRecommendations(id);
     }
 }
 
