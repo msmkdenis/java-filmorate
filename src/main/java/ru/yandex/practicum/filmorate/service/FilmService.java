@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -7,43 +8,27 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.util.List;
 import java.util.Set;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorageDao filmStorageDao;
     private final UserService userService;
     private final LikeStorageDao likeStorageDao;
     private final GenreStorageDao genreStorageDao;
     private final DirectorStorageDao directorStorageDao;
-
-    public FilmService(
-            FilmStorageDao filmStorageDao,
-            UserService userService,
-            LikeStorageDao likeStorageDao,
-            GenreStorageDao genreStorageDao,
-            DirectorStorageDao directorStorageDao
-    ) {
-        this.filmStorageDao = filmStorageDao;
-        this.userService = userService;
-        this.likeStorageDao = likeStorageDao;
-        this.genreStorageDao = genreStorageDao;
-        this.directorStorageDao = directorStorageDao;
-    }
+    private final EventStorageDao eventStorageDao;
 
     public Film addFilm(Film film) {
         filmStorageDao.add(film);
         Set<Genre> genres = genreStorageDao.findFilmGenres(film.getId());
         film.setGenres(genres);
         directorStorageDao.setFilmDirector(film);
-        log.info("Добавлен фильм {}", film.getName());
         return film;
     }
 
@@ -74,28 +59,42 @@ public class FilmService {
 
     public void deleteFilm(long id) {
         findFilmById(id);
-        log.info("Фильм с id = {} удалён", id);
         filmStorageDao.deleteById(id);
     }
 
-    public void addLike(Long filmId, Long userId) {
+    public void addLike(long filmId, long userId) {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.addLike(like);
-        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
+        eventStorageDao.addLikeEvent(filmId, userId);
     }
 
-    public void deleteLike(Long filmId, Long userId) {
+    public void deleteLike(long filmId, long userId) {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.deleteLike(like);
-        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
+        eventStorageDao.deleteLikeEvent(filmId, userId);
     }
 
-    public List<Film> findPopularFilms(Integer count) {
-        return likeStorageDao.findPopularFilms(count);
+    public List<Film> findPopularFilms(int count, long genreId, int year) {
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenreAndYear(count, genreId, year);
+        } else if (genreId != 0 && year == 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenre(count, genreId);
+        } else if (genreId == 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByYear(count, year);
+        } else {
+            films = filmStorageDao.findPopularFilms(count);
+        }
+
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) {

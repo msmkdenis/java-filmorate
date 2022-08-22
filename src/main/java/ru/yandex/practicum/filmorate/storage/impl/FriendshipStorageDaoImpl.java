@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -14,10 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Slf4j
 @Repository
 public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     public FriendshipStorageDaoImpl(JdbcTemplate jdbcTemplate) {

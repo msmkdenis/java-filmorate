@@ -1,43 +1,44 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ProblematicLikesException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewStorageDao;
 
 import java.util.List;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewStorageDao reviewStorageDao;
     private final UserService userService;
     private final FilmService filmService;
-
-    public ReviewService(ReviewStorageDao reviewStorageDao, UserService userService, FilmService filmService) {
-        this.reviewStorageDao = reviewStorageDao;
-        this.userService = userService;
-        this.filmService = filmService;
-    }
+    private final EventStorageDao eventStorageDao;
 
     public Review createReview(Review review) {
         userService.findUserById(review.getUserId());
         filmService.findFilmById(review.getFilmId());
-        return reviewStorageDao.createReview(review).get();
+        Review createdReview = reviewStorageDao.createReview(review).get();
+        eventStorageDao.addReviewEvent(createdReview);
+        return createdReview;
     }
 
     public Review updateReview(Review review) {
         findReviewById(review.getReviewId());
         userService.findUserById(review.getUserId());
         filmService.findFilmById(review.getFilmId());
-        return reviewStorageDao.updateReview(review).get();
+        Review updatedReview = reviewStorageDao.updateReview(review).get();
+        eventStorageDao.updateReviewEvent(updatedReview);
+        return updatedReview;
     }
 
     public void deleteReview(long id) {
-        findReviewById(id);
+        Review deletedReview = findReviewById(id);
         reviewStorageDao.deleteReview(id);
+        eventStorageDao.deleteReviewEvent(deletedReview);
     }
 
     public Review findReviewById(long id) {

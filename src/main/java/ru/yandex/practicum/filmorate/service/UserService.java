@@ -1,26 +1,24 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
 
 import java.util.List;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorageDao userStorageDao;
     private final FriendshipStorageDao friendshipStorageDao;
-
-    public UserService(UserStorageDao userStorageDao, FriendshipStorageDao friendshipStorageDao) {
-        this.userStorageDao = userStorageDao;
-        this.friendshipStorageDao = friendshipStorageDao;
-    }
+    private final EventStorageDao eventStorageDao;
 
     public User addUser(User user) {
         return userStorageDao.add(user).get();
@@ -32,7 +30,7 @@ public class UserService {
         return userStorageDao.update(user).get();
     }
 
-    public User findUserById(Long id) {
+    public User findUserById(long id) {
         return userStorageDao.findById(id).
                 orElseThrow(() -> new NotFoundException(String.format("Пользователь с id = %s не найден", id)));
     }
@@ -41,36 +39,40 @@ public class UserService {
         return userStorageDao.findAll();
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(long id) {
         findUserById(id);
-        log.info("Удаляется user {}", id);
         userStorageDao.deleteById(id);
     }
 
-    public void addFriend(Long id, Long friendId) {
+    public void addFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
         Friendship friendship = new Friendship(user, friend);
         friendshipStorageDao.addFriend(friendship);
-        log.info("User {} добавил в друзья user {}", user.getName(), friend.getName());
+        eventStorageDao.addFriendEvent(id, friendId);
     }
 
-    public void deleteFriend(Long id, Long friendId) {
+    public void deleteFriend(long id, long friendId) {
         User user = findUserById(id);
         User friend = findUserById(friendId);
         Friendship friendship = new Friendship(user, friend);
         friendshipStorageDao.removeFriend(friendship);
-        log.info("User {} удалил из друзей user {}", user.getName(), friend.getName());
+        eventStorageDao.deleteFriendEvent(id, friendId);
     }
 
-    public List<User> findFriendsByUserID(Long id) {
+    public List<User> findFriendsByUserID(long id) {
         findUserById(id);
         return friendshipStorageDao.findUserFriends(id);
     }
 
-    public List<User> findMutualFriends(Long id, Long otherId) {
+    public List<User> findMutualFriends(long id, long otherId) {
         findUserById(id);
         findUserById(otherId);
         return friendshipStorageDao.findMutualFriends(id, otherId);
+    }
+
+    public List<Event> getFeed(long userId) {
+        findUserById(userId);
+        return eventStorageDao.getFeed(userId);
     }
 }
