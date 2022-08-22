@@ -94,7 +94,12 @@ public class FilmService {
     }
 
     public List<Film> findMutualFilms(long userId, long friendId) {
-        return filmStorageDao.findMutualFilms(userId, friendId);
+        List<Film> films = filmStorageDao.findMutualFilms(userId, friendId);
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) {
