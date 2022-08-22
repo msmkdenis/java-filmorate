@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @Validated
+@RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
@@ -22,49 +23,49 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @PostMapping(value = "/films")
+    @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);
     }
 
-    @PutMapping(value = "/films")
+    @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         return filmService.updateFilm(film);
     }
 
-    @GetMapping(value = "/films/{id}")
+    @GetMapping(value = "/{id}")
     public Film findFilmById(@PathVariable Long id) {
         return filmService.findFilmById(id);
     }
 
-    @GetMapping(value = "/films")
+    @GetMapping
     public List<Film> findAllFilms() {
         return filmService.findAll();
     }
 
-    @DeleteMapping(value = "/films/{id}")
+    @DeleteMapping(value = "/{id}")
     public void deleteFilmByID(@PathVariable Long id) {
         filmService.deleteFilm(id);
     }
 
-    @PutMapping(value = "/films/{id}/like/{userId}")
+    @PutMapping(value = "/{id}/like/{userId}")
     public void addLike(@PathVariable("id") Long id,
                         @PathVariable("userId") Long userId) {
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping(value = "/films/{id}/like/{userId}")
+    @DeleteMapping(value = "/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") Long id,
                            @PathVariable("userId") Long userId) {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping(value = "/films/popular")
+    @GetMapping(value = "/popular")
     public List<Film> findPopularFilms(@RequestParam(defaultValue = "10", required = false) @Positive Integer count) {
         return filmService.findPopularFilms(count);
     }
 
-    @GetMapping("/films/director/{directorId}")
+    @GetMapping("/director/{directorId}")
     public List<Film> getListFilmsDirector(@PathVariable long directorId, @RequestParam String sortBy) {
         return filmService.getListFilmsDirector(directorId, sortBy);
     }

@@ -3,14 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Like;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.util.List;
 import java.util.Set;
@@ -23,19 +17,22 @@ public class FilmService {
     private final LikeStorageDao likeStorageDao;
     private final GenreStorageDao genreStorageDao;
     private final DirectorStorageDao directorStorageDao;
+    private final EventStorageDao eventStorageDao;
 
     public FilmService(
             FilmStorageDao filmStorageDao,
             UserService userService,
             LikeStorageDao likeStorageDao,
             GenreStorageDao genreStorageDao,
-            DirectorStorageDao directorStorageDao
+            DirectorStorageDao directorStorageDao,
+            EventStorageDao eventStorageDao
     ) {
         this.filmStorageDao = filmStorageDao;
         this.userService = userService;
         this.likeStorageDao = likeStorageDao;
         this.genreStorageDao = genreStorageDao;
         this.directorStorageDao = directorStorageDao;
+        this.eventStorageDao = eventStorageDao;
     }
 
     public Film addFilm(Film film) {
@@ -83,6 +80,7 @@ public class FilmService {
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.addLike(like);
+        eventStorageDao.addLikeEvent(filmId, userId);
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
     }
 
@@ -91,6 +89,7 @@ public class FilmService {
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.deleteLike(like);
+        eventStorageDao.deleteLikeEvent(filmId, userId);
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
