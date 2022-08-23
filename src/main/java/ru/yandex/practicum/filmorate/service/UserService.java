@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -16,10 +19,15 @@ public class UserService {
 
     private final UserStorageDao userStorageDao;
     private final FriendshipStorageDao friendshipStorageDao;
+    private final EventStorageDao eventStorageDao;
 
-    public UserService(UserStorageDao userStorageDao, FriendshipStorageDao friendshipStorageDao) {
+    public UserService(
+            UserStorageDao userStorageDao,
+            FriendshipStorageDao friendshipStorageDao,
+            EventStorageDao eventStorageDao) {
         this.userStorageDao = userStorageDao;
         this.friendshipStorageDao = friendshipStorageDao;
+        this.eventStorageDao = eventStorageDao;
     }
 
     public User addUser(User user) {
@@ -52,6 +60,7 @@ public class UserService {
         User friend = findUserById(friendId);
         Friendship friendship = new Friendship(user, friend);
         friendshipStorageDao.addFriend(friendship);
+        eventStorageDao.addFriendEvent(id, friendId);
         log.info("User {} добавил в друзья user {}", user.getName(), friend.getName());
     }
 
@@ -60,6 +69,7 @@ public class UserService {
         User friend = findUserById(friendId);
         Friendship friendship = new Friendship(user, friend);
         friendshipStorageDao.removeFriend(friendship);
+        eventStorageDao.deleteFriendEvent(id, friendId);
         log.info("User {} удалил из друзей user {}", user.getName(), friend.getName());
     }
 
@@ -72,5 +82,10 @@ public class UserService {
         findUserById(id);
         findUserById(otherId);
         return friendshipStorageDao.findMutualFriends(id, otherId);
+    }
+
+    public List<Event> getFeed(Long userId) {
+        findUserById(userId);
+        return eventStorageDao.getFeed(userId);
     }
 }

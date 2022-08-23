@@ -143,7 +143,7 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                         "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
                         "FROM FILMS F " +
                         "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
-                        "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                        "LEFT JOIN FILMS_LIKES L ON F.FILM_ID = L.FILM_ID " +
                         "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
                         "WHERE FD.DIRECTOR_ID = ? " +
                         "GROUP BY F.FILM_ID " +
