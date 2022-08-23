@@ -23,27 +23,31 @@ public class DirectorController {
 
     @GetMapping
     public Collection<Director> findAll() {
+        Collection<Director> directors = directorService.getAll();
         log.info("Получен список всех режиссеров");
-        return directorService.getAll();
+        return directors;
     }
 
     @GetMapping("/{id}")
     public Director getById(@PathVariable long id) {
+        Director director = directorService.getById(id);
         log.info("Получен режиссер с id = {}", id);
-        return directorService.getById(id);
+        return director;
     }
 
     @PostMapping
     public Director create(@Valid @RequestBody Director director) {
+        Director directorCreate = directorService.create(director);
         log.info("Режиссер с id = {} создан", director.getId());
-        return directorService.create(director);
+        return directorCreate;
     }
 
     //Изменение режиссёра
     @PutMapping
     public Director update(@Valid @RequestBody Director director) {
+        Director directorUpdate = directorService.update(director);
         log.info("Режиссер с id = {} обновлен", director.getId());
-        return directorService.update(director);
+        return directorUpdate;
     }
 
     //Удаление режиссёра

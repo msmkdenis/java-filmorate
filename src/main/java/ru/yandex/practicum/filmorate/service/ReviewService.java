@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ProblematicLikesException;
@@ -10,25 +10,13 @@ import ru.yandex.practicum.filmorate.storage.dao.ReviewStorageDao;
 
 import java.util.List;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewStorageDao reviewStorageDao;
     private final UserService userService;
     private final FilmService filmService;
     private final EventStorageDao eventStorageDao;
-
-    public ReviewService(
-            ReviewStorageDao reviewStorageDao,
-            UserService userService,
-            FilmService filmService,
-            EventStorageDao eventStorageDao)
-    {
-        this.reviewStorageDao = reviewStorageDao;
-        this.userService = userService;
-        this.filmService = filmService;
-        this.eventStorageDao = eventStorageDao;
-    }
 
     public Review createReview(Review review) {
         userService.findUserById(review.getUserId());

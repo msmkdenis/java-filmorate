@@ -25,7 +25,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     @Override
-    public void addFriendEvent(Long id, Long friendId) {
+    public void addFriendEvent(long id, long friendId) {
         Event event = getBaseEvent(id, friendId);
         event.setEventType(EventType.FRIEND);
         event.setOperation(EventOperation.ADD);
@@ -33,7 +33,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     @Override
-    public void deleteFriendEvent(Long id, Long friendId){
+    public void deleteFriendEvent(long id, long friendId){
         Event event = getBaseEvent(id, friendId);
         event.setEventType(EventType.FRIEND);
         event.setOperation(EventOperation.REMOVE);
@@ -41,7 +41,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     @Override
-    public void addLikeEvent(Long filmId, Long userId) {
+    public void addLikeEvent(long filmId, long userId) {
         Event event = getBaseEvent(userId, filmId);
         event.setEventType(EventType.LIKE);
         event.setOperation(EventOperation.ADD);
@@ -49,7 +49,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     @Override
-    public void deleteLikeEvent(Long filmId, Long userId) {
+    public void deleteLikeEvent(long filmId, long userId) {
         Event event = getBaseEvent(userId, filmId);
         event.setEventType(EventType.LIKE);
         event.setOperation(EventOperation.REMOVE);
@@ -81,7 +81,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     @Override
-    public List<Event> getFeed(Long userId) {
+    public List<Event> getFeed(long userId) {
         String sqlQuery = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID " +
                           "FROM EVENTS " +
                           "WHERE USER_ID = ?";
@@ -95,7 +95,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(c -> {
-            PreparedStatement ps = c.prepareStatement(sql, new String[]{"event_id"});
+            PreparedStatement ps = c.prepareStatement(sql, new String[]{"EVENT_ID"});
             ps.setLong(1, event.getTimestamp());
             ps.setLong(2, event.getUserId());
             ps.setString(3, event.getEventType().toString());
@@ -107,7 +107,7 @@ public class EventStorageDaoImpl implements EventStorageDao {
         event.setEventId(keyHolder.getKey().longValue());
     }
 
-    private Event getBaseEvent(Long userId, Long entityId) {
+    private Event getBaseEvent(long userId, long entityId) {
         Event event = new Event();
         event.setTimestamp(Instant.now().toEpochMilli());
         event.setUserId(userId);
@@ -116,13 +116,11 @@ public class EventStorageDaoImpl implements EventStorageDao {
     }
 
     private Event makeLocalEvent(ResultSet rs, int num) throws SQLException {
-        Event event = new Event();
-        event.setEventId(rs.getLong("EVENT_ID"));
-        event.setTimestamp(rs.getLong("TIMESTAMP"));
-        event.setUserId(rs.getLong("USER_ID"));
-        event.setEventType(EventType.valueOf(rs.getString("EVENT_TYPE")));
-        event.setOperation(EventOperation.valueOf(rs.getString("OPERATION")));
-        event.setEntityId(rs.getLong("ENTITY_ID"));
-        return event;
+        return new Event(rs.getLong("EVENT_ID"),
+                        rs.getLong("TIMESTAMP"),
+                        rs.getLong("USER_ID"),
+                EventType.valueOf(rs.getString("EVENT_TYPE")),
+                EventOperation.valueOf(rs.getString("OPERATION")),
+                        rs.getLong("ENTITY_ID"));
     }
 }

@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @AllArgsConstructor
 public class Friendship {
-
     @NonNull
     private final User user;
 

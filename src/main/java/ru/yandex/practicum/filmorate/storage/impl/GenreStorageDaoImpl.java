@@ -49,7 +49,7 @@ public class GenreStorageDaoImpl implements GenreStorageDao {
 
     private Genre makeLocalGenre(ResultSet rs) throws SQLException {
         return new Genre(
-                rs.getInt("GENRE_ID"),
+                rs.getLong("GENRE_ID"),
                 rs.getString("GENRE_NAME")
         );
     }

@@ -24,11 +24,15 @@ public class MpaController {
 
     @GetMapping
     public List<Mpa> findAll() {
-        return mpaService.findAll();
+        List<Mpa> mpas = mpaService.findAll();
+        log.info("Получен список всех рейтингов.");
+        return mpas;
     }
 
     @GetMapping(value = "/{id}")
-    public Mpa findMpaById(@PathVariable("id") Integer id){
-        return mpaService.findMpaById(id);
+    public Mpa findMpaById(@PathVariable("id") long id){
+        Mpa mpa = mpaService.findMpaById(id);
+        log.info("Получен рейтинг {}", id);
+        return mpa;
     }
 }

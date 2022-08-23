@@ -20,7 +20,7 @@ public class MpaService {
         return mpaStorageDao.findAll();
     }
 
-    public Mpa findMpaById(int id) {
+    public Mpa findMpaById(long id) {
         return mpaStorageDao.findById(id).
                 orElseThrow(() -> new NotFoundException(String.format("Рейтинг с id = %s не найден", id)));
     }

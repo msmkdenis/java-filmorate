@@ -20,7 +20,7 @@ public class MpaStorageDaoImpl implements MpaStorageDao {
     }
 
     @Override
-    public Optional<Mpa> findById(int id) {
+    public Optional<Mpa> findById(long id) {
         final String sqlQuery = "SELECT * FROM MPA WHERE MPA_ID = ?";
         final List<Mpa> mpa = jdbcTemplate.query(sqlQuery, this::makeLocalMpa, id);
         return mpa.size() == 0 ?
@@ -36,7 +36,7 @@ public class MpaStorageDaoImpl implements MpaStorageDao {
 
     private Mpa makeLocalMpa(ResultSet rs, int rowNum) throws SQLException {
         return new Mpa(
-                rs.getInt("MPA_ID"),
+                rs.getLong("MPA_ID"),
                 rs.getString("MPA_NAME")
         );
     }

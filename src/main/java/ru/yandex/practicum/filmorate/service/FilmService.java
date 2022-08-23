@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorageDao filmStorageDao;
     private final UserService userService;
@@ -19,28 +20,11 @@ public class FilmService {
     private final DirectorStorageDao directorStorageDao;
     private final EventStorageDao eventStorageDao;
 
-    public FilmService(
-            FilmStorageDao filmStorageDao,
-            UserService userService,
-            LikeStorageDao likeStorageDao,
-            GenreStorageDao genreStorageDao,
-            DirectorStorageDao directorStorageDao,
-            EventStorageDao eventStorageDao
-    ) {
-        this.filmStorageDao = filmStorageDao;
-        this.userService = userService;
-        this.likeStorageDao = likeStorageDao;
-        this.genreStorageDao = genreStorageDao;
-        this.directorStorageDao = directorStorageDao;
-        this.eventStorageDao = eventStorageDao;
-    }
-
     public Film addFilm(Film film) {
         filmStorageDao.add(film);
         Set<Genre> genres = genreStorageDao.findFilmGenres(film.getId());
         film.setGenres(genres);
         directorStorageDao.setFilmDirector(film);
-        log.info("Добавлен фильм {}", film.getName());
         return film;
     }
 
@@ -71,30 +55,42 @@ public class FilmService {
 
     public void deleteFilm(long id) {
         findFilmById(id);
-        log.info("Фильм с id = {} удалён", id);
         filmStorageDao.deleteById(id);
     }
 
-    public void addLike(Long filmId, Long userId) {
+    public void addLike(long filmId, long userId) {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.addLike(like);
         eventStorageDao.addLikeEvent(filmId, userId);
-        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
     }
 
-    public void deleteLike(Long filmId, Long userId) {
+    public void deleteLike(long filmId, long userId) {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         likeStorageDao.deleteLike(like);
         eventStorageDao.deleteLikeEvent(filmId, userId);
-        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
-    public List<Film> findPopularFilms(Integer count) {
-        return likeStorageDao.findPopularFilms(count);
+    public List<Film> findPopularFilms(int count, long genreId, int year) {
+        List<Film> films;
+        if (genreId != 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenreAndYear(count, genreId, year);
+        } else if (genreId != 0 && year == 0) {
+            films = filmStorageDao.findPopularFilmSortedByGenre(count, genreId);
+        } else if (genreId == 0 && year != 0) {
+            films = filmStorageDao.findPopularFilmSortedByYear(count, year);
+        } else {
+            films = filmStorageDao.findPopularFilms(count);
+        }
+
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) {

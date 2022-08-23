@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface EventStorageDao {
 
-    void addFriendEvent(Long id, Long friendId);
+    void addFriendEvent(long id, long friendId);
 
-    void deleteFriendEvent(Long id, Long friendId);
+    void deleteFriendEvent(long id, long friendId);
 
-    void addLikeEvent(Long id, Long userId);
+    void addLikeEvent(long id, long userId);
 
-    void deleteLikeEvent(Long id, Long userId);
+    void deleteLikeEvent(long id, long userId);
 
     void addReviewEvent(Review reviewAnswer);
 
@@ -21,5 +21,5 @@ public interface EventStorageDao {
 
     void deleteReviewEvent(Review review);
 
-    List<Event> getFeed(Long userId);
+    List<Event> getFeed(long userId);
 }

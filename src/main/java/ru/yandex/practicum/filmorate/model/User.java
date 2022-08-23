@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @ToString
 public class User extends BaseEntity {
-
     @Email(message = "E-mail не должен быть пустым и должен содержать символ @")
     private String email;
 
