@@ -151,9 +151,9 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
     @Override
     public List<Film> findMutualFilms(long userId, long friendId) {
         String sql = "SELECT *" +
-                "FROM FILMS F, MPA M, LIKES L1, LIKES L2 " +
-                "WHERE F.FILM_ID = L1.FILM_ID AND F.FILM_ID = L2.FILM_ID AND L1.USER_ID = ? AND L2.USER_ID = ?" +
-                "AND M.MPA_ID = F.MPA_ID";
+                "FROM FILMS F, MPA M, FILMS_LIKES L1, FILMS_LIKES L2 " +
+                "WHERE F.FILM_ID = L1.FILM_ID AND F.FILM_ID = L2.FILM_ID AND L1.USER_ID = ? AND L2.USER_ID = ? " +
+                "AND M.MPA_ID = F.MPA_ID ";
         return jdbcTemplate.query(sql, this::makeLocalFilm, userId, friendId);
     }
 

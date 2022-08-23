@@ -88,10 +88,11 @@ public class FilmController {
         return films;
     }
 
-    @GetMapping(value = "/films/common")
-    public List<Film> findMutualFilms(@RequestParam("userId") Long userId,
-                                      @RequestParam("friendId") Long friendId) {
-        return filmService.findMutualFilms(userId, friendId);
+    @GetMapping(value = "/common")
+    public List<Film> findMutualFilms(@RequestParam long userId, @RequestParam long friendId) {
+        List<Film> films = filmService.findMutualFilms(userId, friendId);
+        log.info("Получен список общих фильмов пользователя: {} и пользователя: {}", userId, friendId);
+        return films;
     }
 }
 
