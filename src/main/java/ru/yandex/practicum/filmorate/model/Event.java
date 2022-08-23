@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 public class Event {
     private Long eventId;
     private Long timestamp;

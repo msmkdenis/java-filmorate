@@ -26,7 +26,7 @@ public class UserController {
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         User userCreate = userService.addUser(user);
-        log.info("Добавлен пользователь {}", userCreate.getName());
+        log.info("Добавлен пользователь {}", user.getName());
         return userCreate;
     }
 
@@ -91,11 +91,6 @@ public class UserController {
         List<Event> events = userService.getFeed(userId);
         log.info("Получен список событий пользователя {}", userId);
         return events;
-    }
-
-    @GetMapping("/{userId}/feed")
-    public List<Event> getFeed(@PathVariable Long userId) {
-        return userService.getFeed(userId);
     }
 }
 
