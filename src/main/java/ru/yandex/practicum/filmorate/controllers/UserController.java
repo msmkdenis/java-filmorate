@@ -92,6 +92,11 @@ public class UserController {
         log.info("Получен список событий пользователя {}", userId);
         return events;
     }
+
+    @GetMapping("/{userId}/feed")
+    public List<Event> getFeed(@PathVariable Long userId) {
+        return userService.getFeed(userId);
+    }
 }
 
 
