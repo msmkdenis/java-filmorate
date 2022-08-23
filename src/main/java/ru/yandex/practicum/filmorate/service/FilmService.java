@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -117,12 +118,18 @@ public class FilmService {
     }
 
     public List<Film> searchFilms(String query, String by) {
+        List<Film> films;
         if (query == null || by == null) {
-            return findPopularFilms(findAll().size());
+            films = findPopularFilms(findAll().size());
         } else if (by.equals("director") || by.equals("title") || by.equals("director,title") || by.equals("title,director")) {
-            return filmStorageDao.searchFilms(query, by);
+            films = filmStorageDao.searchFilms(query, by);
         } else {
             return null;
         }
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
     }
 }
