@@ -154,15 +154,41 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
 
     @Override
     public List<Film> searchFilms(String query, String by) {
-            return null;
+            if (by.equals("director")) {
+                return searchFilmsByDirector(query);
+            } else if (by.equals("title")) {
+                return searchFilmsByTitle(query);
+            } else {
+                List<Film> listByTitleAndDirectors = searchFilmsByDirector(query);
+                listByTitleAndDirectors.addAll(searchFilmsByTitle(query));
+                return listByTitleAndDirectors;
+            }
     }
 
-    private List<Film> searchFilmsByTitle(String query, String by) {
-
+    private List<Film> searchFilmsByTitle(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE LOWER(F.FILM_NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeLocalFilm, "%" + query + "%");
     }
 
-    private List<Film> searchFilmsByDirector(String query, String by) {
-
+    private List<Film> searchFilmsByDirector(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                "WHERE LOWER(D.NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeLocalFilm, "%" + query + "%");
     }
     private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {
         return new Film(rs.getLong("FILM_ID"),
