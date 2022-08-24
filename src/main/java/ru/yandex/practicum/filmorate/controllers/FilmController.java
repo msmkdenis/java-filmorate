@@ -94,5 +94,12 @@ public class FilmController {
         log.info("Получен список общих фильмов пользователя: {} и пользователя: {}", userId, friendId);
         return films;
     }
+
+    @GetMapping(value = "/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam String by) {
+        List<Film> films = filmService.searchFilms(query, by);
+        log.info("Осуществлен поиск фильмов");
+        return films;
+    }
 }
 

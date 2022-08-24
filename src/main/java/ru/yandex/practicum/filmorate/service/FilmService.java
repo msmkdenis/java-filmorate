@@ -115,4 +115,24 @@ public class FilmService {
         }
         return films;
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        List<Film> films;
+        if (query == null || by == null) {
+            films = filmStorageDao.findPopularFilms(findAll().size());
+        } else if (by.equals("director")) {
+            films = filmStorageDao.searchFilmsByDirector(query);
+        } else if (by.equals("title")) {
+            films = filmStorageDao.searchFilmsByTitle(query);
+        } else if (by.equals("director,title") || by.equals("title,director")) {
+            films = filmStorageDao.searchFilmsByTitleAndDirector(query);
+        } else {
+            return null;
+        }
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
+    }
 }
