@@ -10,9 +10,7 @@
 
 ## Схема базы данных
 
-![This is an image](/scheme.png)
-
-https://drawsql.app/teams/yandex-5/diagrams/filmorate
+![This is an image](/schema.png)
 
 # Примеры запросов
 
