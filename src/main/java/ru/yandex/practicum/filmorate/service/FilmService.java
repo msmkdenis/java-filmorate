@@ -62,8 +62,10 @@ public class FilmService {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
-        likeStorageDao.addLike(like);
         eventStorageDao.addLikeEvent(filmId, userId);
+        if (likeStorageDao.getLikes(like).size()==0) {
+            likeStorageDao.addLike(like);
+        }
     }
 
     public void deleteLike(long filmId, long userId) {

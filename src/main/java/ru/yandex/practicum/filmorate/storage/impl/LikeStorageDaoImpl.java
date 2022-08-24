@@ -5,10 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
-import ru.yandex.practicum.filmorate.storage.dao.DirectorStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.GenreStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +18,7 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
     private final FilmStorageDao filmStorageDao;
     private final GenreStorageDao genreStorageDao;
     private final DirectorStorageDao directorStorageDao;
+    private final UserStorageDao userStorageDao;
 
     @Override
     public void addLike(Like like) {
@@ -28,6 +26,19 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
         jdbcTemplate.update(sqlQuery,
                 like.getUser().getId(),
                 like.getFilm().getId());
+    }
+
+    @Override
+    public List<Like> getLikes(Like like) {
+            String sqlQuery =
+                    "SELECT FILMS_LIKES.USER_ID, FILMS_LIKES.FILM_ID " +
+                    "FROM FILMS_LIKES " +
+                    "WHERE FILMS_LIKES.USER_ID = ? AND FILMS_LIKES.FILM_ID = ? " +
+                    "LIMIT 1";
+            return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(
+                    userStorageDao.findById(rs.getLong("FILMS_LIKES.USER_ID")).get(),
+                    filmStorageDao.findById(rs.getLong("FILMS_LIKES.FILM_ID")).get()),
+                    like.getUser().getId(), like.getFilm().getId());
     }
 
     @Override
