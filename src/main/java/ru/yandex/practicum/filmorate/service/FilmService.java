@@ -119,9 +119,13 @@ public class FilmService {
     public List<Film> searchFilms(String query, String by) {
         List<Film> films;
         if (query == null || by == null) {
-            films = findPopularFilms(findAll().size());
-        } else if (by.equals("director") || by.equals("title") || by.equals("director,title") || by.equals("title,director")) {
-            films = filmStorageDao.searchFilms(query, by);
+            films = filmStorageDao.findPopularFilms(findAll().size());
+        } else if (by.equals("director")) {
+            films = filmStorageDao.searchFilmsByDirector(query);
+        } else if (by.equals("title")) {
+            films = filmStorageDao.searchFilmsByTitle(query);
+        } else if (by.equals("director,title") || by.equals("title,director")) {
+            films = filmStorageDao.searchFilmsByTitleAndDirector(query);
         } else {
             return null;
         }
