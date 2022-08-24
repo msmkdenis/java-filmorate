@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -91,6 +92,11 @@ public class UserController {
         List<Event> events = userService.getFeed(userId);
         log.info("Получен список событий пользователя {}", userId);
         return events;
+    }
+    @GetMapping(value = "/{id}/recommendations")
+    public List<Film> filmRecommendations(@PathVariable("id") Long id) {
+        log.info("Получены рекомендации пользователя {}", id);
+        return userService.filmRecommendations(id);
     }
 }
 

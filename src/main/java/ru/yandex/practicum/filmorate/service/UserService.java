@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.EventStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
 import ru.yandex.practicum.filmorate.storage.dao.UserStorageDao;
-
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -20,6 +20,7 @@ public class UserService {
     private final UserStorageDao userStorageDao;
     private final FriendshipStorageDao friendshipStorageDao;
     private final EventStorageDao eventStorageDao;
+    private final LikeStorageDao likeStorageDao;
 
     public User addUser(User user) {
         return userStorageDao.add(user).get();
@@ -75,5 +76,9 @@ public class UserService {
     public List<Event> getFeed(long userId) {
         findUserById(userId);
         return eventStorageDao.getFeed(userId);
+    }
+    public List<Film> filmRecommendations(Long id) {
+        findUserById(id);
+        return likeStorageDao.filmRecommendations(id);
     }
 }
