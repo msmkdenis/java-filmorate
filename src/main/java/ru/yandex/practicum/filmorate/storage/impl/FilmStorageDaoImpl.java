@@ -217,6 +217,41 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         return jdbcTemplate.query(sql, this::makeLocalFilm, userId, friendId);
     }
 
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query) {
+        List<Film> listByTitleAndDirectors = searchFilmsByDirector(query);
+        listByTitleAndDirectors.addAll(searchFilmsByTitle(query));
+        return listByTitleAndDirectors;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitle(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN FILMS_LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "WHERE LOWER(F.FILM_NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeLocalFilm, "%" + query + "%");
+    }
+
+    @Override
+    public List<Film> searchFilmsByDirector(String query) {
+        final String sql = "SELECT F.FILM_ID, F.FILM_NAME, F.DESCRIPTION, F.RELEASE_DATE, " +
+                "F.DURATION, M.MPA_ID, M.MPA_NAME, FD.DIRECTOR_ID " +
+                "FROM FILMS F " +
+                "JOIN MPA M ON F.MPA_ID = M.MPA_ID " +
+                "LEFT JOIN FILMS_LIKES L ON F.FILM_ID = L.FILM_ID " +
+                "JOIN FILMS_DIRECTORS FD ON F.FILM_ID = FD.FILM_ID " +
+                "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                "WHERE LOWER(D.NAME) LIKE LOWER(?) " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(L.USER_ID)";
+        return jdbcTemplate.query(sql, this::makeLocalFilm, "%" + query + "%");
+    }
+
     private Film makeLocalFilm(ResultSet rs, int rowNum) throws SQLException {
         return new Film(rs.getLong("FILM_ID"),
                 rs.getString("FILM_NAME"),

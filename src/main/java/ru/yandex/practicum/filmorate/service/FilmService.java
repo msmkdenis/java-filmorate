@@ -62,8 +62,10 @@ public class FilmService {
         User user = userService.findUserById(userId);
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
-        likeStorageDao.addLike(like);
         eventStorageDao.addLikeEvent(filmId, userId);
+        if (likeStorageDao.getLikes(like).size()==0) {
+            likeStorageDao.addLike(like);
+        }
     }
 
     public void deleteLike(long filmId, long userId) {
@@ -109,6 +111,26 @@ public class FilmService {
         userService.findUserById(userId);
         userService.findUserById(friendId);
         List<Film> films = filmStorageDao.findMutualFilms(userId, friendId);
+        for (Film film : films) {
+            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+        }
+        return films;
+    }
+
+    public List<Film> searchFilms(String query, String by) {
+        List<Film> films;
+        if (query == null || by == null) {
+            films = filmStorageDao.findPopularFilms(findAll().size());
+        } else if (by.equals("director")) {
+            films = filmStorageDao.searchFilmsByDirector(query);
+        } else if (by.equals("title")) {
+            films = filmStorageDao.searchFilmsByTitle(query);
+        } else if (by.equals("director,title") || by.equals("title,director")) {
+            films = filmStorageDao.searchFilmsByTitleAndDirector(query);
+        } else {
+            return null;
+        }
         for (Film film : films) {
             film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
             film.setDirectors(directorStorageDao.loadFilmDirector(film));
