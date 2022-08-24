@@ -65,7 +65,7 @@ public class FilmService {
         Film film = findFilmById(filmId);
         Like like = new Like(user, film);
         eventStorageDao.addLikeEvent(filmId, userId);
-        if (likeStorageDao.getLikes(like).size()==0) {
+        if (likeStorageDao.getLikes(like).size() == 0) {
             likeStorageDao.addLike(like);
         }
     }
@@ -89,7 +89,6 @@ public class FilmService {
         } else {
             films = filmStorageDao.findPopularFilms(count);
         }
-
         for (Film film : films) {
             film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
             film.setDirectors(directorStorageDao.loadFilmDirector(film));

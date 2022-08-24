@@ -85,7 +85,6 @@ public class EventStorageDaoImpl implements EventStorageDao {
         String sqlQuery = "SELECT EVENT_ID, TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID " +
                           "FROM EVENTS " +
                           "WHERE USER_ID = ?";
-
         return jdbcTemplate.query(sqlQuery, this::makeLocalEvent, userId);
     }
 
@@ -93,7 +92,6 @@ public class EventStorageDaoImpl implements EventStorageDao {
         String sql = "INSERT INTO EVENTS (TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                      "VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
         jdbcTemplate.update(c -> {
             PreparedStatement ps = c.prepareStatement(sql, new String[]{"EVENT_ID"});
             ps.setLong(1, event.getTimestamp());
@@ -103,7 +101,6 @@ public class EventStorageDaoImpl implements EventStorageDao {
             ps.setLong(5, event.getEntityId());
             return ps;
         }, keyHolder);
-
         event.setEventId(keyHolder.getKey().longValue());
     }
 

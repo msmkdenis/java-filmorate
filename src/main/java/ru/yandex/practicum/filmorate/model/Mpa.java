@@ -9,11 +9,8 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Mpa{
-
+public class Mpa {
     private long id;
-
     @NotBlank
     private String name;
-
 }

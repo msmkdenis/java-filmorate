@@ -11,11 +11,10 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/genres")
+@Slf4j
 public class GenreController {
-
     private final GenreService genreService;
 
     @Autowired
@@ -30,7 +29,7 @@ public class GenreController {
         return genres;
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping("/{id}")
     public Genre getById(@PathVariable("id") long id) {
         Genre genre = genreService.findById(id);
         log.info("Получен жанр {}", id);

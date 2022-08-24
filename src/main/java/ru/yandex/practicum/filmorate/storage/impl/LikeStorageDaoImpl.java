@@ -15,7 +15,6 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 public class LikeStorageDaoImpl implements LikeStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
     private final FilmStorageDao filmStorageDao;
     private final GenreStorageDao genreStorageDao;
@@ -45,7 +44,7 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
     }
 
     @Override
-    public List<Film> filmRecommendations(Long id) {
+    public List<Film> getFilmRecommendations(Long id) {
         List<Film> recommendations = new ArrayList<>();
         String sqlQuery = "SELECT L2.USER_ID " +
                 "FROM FILMS_LIKES AS L1 " +
@@ -55,18 +54,16 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
                 "GROUP BY L2.USER_ID " +
                 "ORDER BY COUNT(L2.USER_ID) DESC " +
                 "LIMIT 1";
-
         List<Long> sameLikesUser = jdbcTemplate.queryForList(sqlQuery, Long.class, id);
-        if (sameLikesUser.size()!=1) {
+        if (sameLikesUser.size() != 1) {
             return recommendations;
         }
         Long sameLikesUserId = sameLikesUser.get(0);
 
         String sqlQuery2 = "SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ? " +
                 "EXCEPT (SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ?)";
-
         List<Long> filmDifferences = jdbcTemplate.queryForList(sqlQuery2, Long.class, sameLikesUserId, id);
-        for(Long filmId: filmDifferences) {
+        for(Long filmId : filmDifferences) {
             Film film = filmStorageDao.findById(filmId).get();
             film.setGenres(genreStorageDao.findFilmGenres(filmId));
             film.setDirectors(directorStorageDao.loadFilmDirector(film));

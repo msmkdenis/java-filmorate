@@ -16,6 +16,7 @@ import java.util.Collection;
 @Slf4j
 public class DirectorController {
     private final DirectorService directorService;
+
     @Autowired
     public DirectorController(DirectorService directorService) {
         this.directorService = directorService;
@@ -42,7 +43,6 @@ public class DirectorController {
         return directorCreate;
     }
 
-    //Изменение режиссёра
     @PutMapping
     public Director update(@Valid @RequestBody Director director) {
         Director directorUpdate = directorService.update(director);
@@ -50,7 +50,6 @@ public class DirectorController {
         return directorUpdate;
     }
 
-    //Удаление режиссёра
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id) {
         directorService.delete(id);

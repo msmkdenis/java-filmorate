@@ -11,7 +11,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GenreService {
-
     private final GenreStorageDao genreStorageDao;
 
     public List<Genre> findAll() {

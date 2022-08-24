@@ -39,7 +39,6 @@ public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
                 "SELECT * " +
                         "FROM USERS, FRIENDS " +
                         "WHERE USERS.USER_ID = FRIENDS.FRIEND_ID AND FRIENDS.USER_ID = ?", userId);
-
         return findUsers(sqlQuery);
     }
 
@@ -50,7 +49,6 @@ public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
                         "FROM USERS U, FRIENDS F, FRIENDS O " +
                         "WHERE U.USER_ID = F.FRIEND_ID AND U.USER_ID = O.FRIEND_ID AND F.USER_ID = ? AND O.USER_ID = ?",
                 userId, otherId);
-
         return findUsers(sqlQuery);
     }
 

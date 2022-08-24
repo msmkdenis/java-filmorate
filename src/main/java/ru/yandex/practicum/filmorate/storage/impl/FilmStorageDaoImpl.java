@@ -20,7 +20,6 @@ import static java.util.Objects.isNull;
 
 @Repository
 public class FilmStorageDaoImpl implements FilmStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     public FilmStorageDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -65,8 +64,7 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
         final String sqlQuery =
                 "SELECT * FROM FILMS " +
                 "JOIN MPA ON FILMS.MPA_ID = MPA.MPA_ID";
-        final List<Film> films = jdbcTemplate.query(sqlQuery, this::makeLocalFilm);
-        return films;
+        return jdbcTemplate.query(sqlQuery, this::makeLocalFilm);
     }
 
     @Override
@@ -75,7 +73,6 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                 "UPDATE FILMS " +
                 "SET FILM_NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, MPA_ID = ? " +
                 "WHERE FILM_ID = ?";
-
         jdbcTemplate.update(sqlQuery,
                 film.getName(),
                 film.getDescription(),
@@ -83,9 +80,7 @@ public class FilmStorageDaoImpl implements FilmStorageDao {
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-
         deleteGenresFromFilm(film);
-
         final String sqlDelete = "DELETE FROM FILMS_DIRECTORS WHERE FILM_ID = ?";
         jdbcTemplate.update(sqlDelete, film.getId());
         return filmWithGenres(film);

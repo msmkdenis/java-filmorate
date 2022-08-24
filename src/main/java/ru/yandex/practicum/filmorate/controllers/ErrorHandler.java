@@ -42,5 +42,4 @@ public class ErrorHandler {
     public ResponseEntity<String> argumentViolation(final MethodArgumentNotValidException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
 }

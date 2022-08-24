@@ -17,7 +17,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserStorageDao userStorageDao;
     private final FriendshipStorageDao friendshipStorageDao;
     private final EventStorageDao eventStorageDao;
@@ -78,8 +77,9 @@ public class UserService {
         findUserById(userId);
         return eventStorageDao.getFeed(userId);
     }
-    public List<Film> filmRecommendations(Long id) {
+
+    public List<Film> getFilmRecommendations(Long id) {
         findUserById(id);
-        return likeStorageDao.filmRecommendations(id);
+        return likeStorageDao.getFilmRecommendations(id);
     }
 }

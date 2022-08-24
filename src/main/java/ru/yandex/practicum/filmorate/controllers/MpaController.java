@@ -11,9 +11,9 @@ import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/mpa")
+@Slf4j
 public class MpaController {
     private final MpaService mpaService;
 
@@ -29,7 +29,7 @@ public class MpaController {
         return mpas;
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping("/{id}")
     public Mpa findMpaById(@PathVariable("id") long id){
         Mpa mpa = mpaService.findMpaById(id);
         log.info("Получен рейтинг {}", id);

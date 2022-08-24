@@ -12,5 +12,6 @@ public interface LikeStorageDao {
     List<Like> getLikes(Like like);
 
     void deleteLike(Like like);
-    List<Film> filmRecommendations(Long id);
+
+    List<Film> getFilmRecommendations(Long id);
 }

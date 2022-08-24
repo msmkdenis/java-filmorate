@@ -11,8 +11,8 @@ import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
-@Slf4j
 @RequestMapping("/reviews")
+@Slf4j
 public class ReviewController {
     private final ReviewService reviewService;
 

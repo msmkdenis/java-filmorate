@@ -18,12 +18,9 @@ import java.time.LocalDate;
 public class User extends BaseEntity {
     @Email(message = "E-mail не должен быть пустым и должен содержать символ @")
     private String email;
-
     @LoginConstraint
     private String login;
-
     private String name;
-
     @PastOrPresent(message = "Дата дня рождения не может быть в будущем")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;

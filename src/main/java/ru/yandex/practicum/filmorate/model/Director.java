@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class Director extends BaseEntity {
-
     @NotBlank(message = "Имя режиссера не может быть пустым.")
     @NotNull(message = "Отсутствует имя режиссера.")
     private String name;

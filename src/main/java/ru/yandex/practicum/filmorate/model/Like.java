@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 public class Like {
     @NonNull
     private final User user;
-
     @NonNull
     private final Film film;
-
 }

@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Repository
 public class MpaStorageDaoImpl implements MpaStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     public MpaStorageDaoImpl(JdbcTemplate jdbcTemplate) {

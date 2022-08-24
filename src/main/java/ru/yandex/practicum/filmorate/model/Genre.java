@@ -13,7 +13,6 @@ import javax.validation.constraints.NotBlank;
 @EqualsAndHashCode(of = "id")
 public class Genre {
     private long id;
-
     @NotBlank(message = "Отсутствует название жанра")
     private String name;
 }

@@ -11,7 +11,6 @@ import java.util.*;
 
 @Repository
 public class GenreStorageDaoImpl implements GenreStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     public GenreStorageDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -53,5 +52,4 @@ public class GenreStorageDaoImpl implements GenreStorageDao {
                 rs.getString("GENRE_NAME")
         );
     }
-
 }

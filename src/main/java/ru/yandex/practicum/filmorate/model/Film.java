@@ -21,24 +21,18 @@ public class Film extends BaseEntity {
     @NotBlank(message = "Название фильма не может быть пустым")
     @NotNull(message = "Отсутствует название фильма")
     private String name;
-
     @Size(max = 200, message = "Максимальное кол-во символов - 200")
     @NotNull(message = "Отсутствует описание фильма")
     private String description;
-
     @ReleaseDateConstraint
     @NotNull(message = "Отсутствует дата выхода фильма")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;
-
     @Positive(message = "Продолжительность фильма должна быть положительной")
     private Integer duration;
-
     @NotNull(message = "Отсутствует рейтинг фильма.")
     private Mpa mpa;
-
     private Set<Genre> genres;
-
     private int rate;
     private List<Director> directors;
 

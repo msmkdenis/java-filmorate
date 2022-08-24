@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,9 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Repository
-@Slf4j
 public class UserStorageDaoImpl implements UserStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -54,7 +51,6 @@ public class UserStorageDaoImpl implements UserStorageDao {
         }, keyHolder);
         user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
         user.setName(userName[0]);
-        log.info("Добавлен пользователь {}", user.getName());
         return Optional.of(user);
     }
 
@@ -68,7 +64,6 @@ public class UserStorageDaoImpl implements UserStorageDao {
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
-        log.info("Обновлен пользователь {}", user.getId());
         return findById(user.getId());
     }
 
