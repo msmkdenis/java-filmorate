@@ -105,7 +105,6 @@ public class FilmService {
         }
         return films;
     }
-
     public List<Film> findMutualFilms(long userId, long friendId) {
         userService.findUserById(userId);
         userService.findUserById(friendId);
