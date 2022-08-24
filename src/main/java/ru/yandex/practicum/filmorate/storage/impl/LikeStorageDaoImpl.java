@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,15 +32,10 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
 
     @Override
     public List<Like> getLikes(Like like) {
-            String sqlQuery =
-                    "SELECT FILMS_LIKES.USER_ID, FILMS_LIKES.FILM_ID " +
-                    "FROM FILMS_LIKES " +
-                    "WHERE FILMS_LIKES.USER_ID = ? AND FILMS_LIKES.FILM_ID = ? " +
-                    "LIMIT 1";
-            return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> new Like(
-                    userStorageDao.findById(rs.getLong("FILMS_LIKES.USER_ID")).get(),
-                    filmStorageDao.findById(rs.getLong("FILMS_LIKES.FILM_ID")).get()),
-                    like.getUser().getId(), like.getFilm().getId());
+        String sqlQuery = "SELECT FILMS_LIKES.USER_ID, FILMS_LIKES.FILM_ID " +
+                "FROM FILMS_LIKES " +
+                "WHERE FILMS_LIKES.USER_ID = ? AND FILMS_LIKES.FILM_ID = ? ";
+        return jdbcTemplate.query(sqlQuery, this::makeLocalLike, like.getUser().getId(), like.getFilm().getId());
     }
 
     @Override
@@ -76,5 +73,11 @@ public class LikeStorageDaoImpl implements LikeStorageDao {
             recommendations.add(film);
         }
         return recommendations;
+    }
+
+    private Like makeLocalLike(ResultSet rs, int num) throws SQLException {
+        return new Like(
+                userStorageDao.findById(rs.getLong("FILMS_LIKES.USER_ID")).get(),
+                filmStorageDao.findById(rs.getLong("FILMS_LIKES.FILM_ID")).get());
     }
 }
