@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,11 +49,7 @@ public class FilmService {
 
     public List<Film> findAll() {
         List<Film> films = filmStorageDao.findAll();
-        for (Film film : films) {
-            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
-            film.setDirectors(directorStorageDao.loadFilmDirector(film));
-        }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
     }
 
     public void deleteFilm(long id) {
@@ -89,11 +86,7 @@ public class FilmService {
         } else {
             films = filmStorageDao.findPopularFilms(count);
         }
-        for (Film film : films) {
-            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
-            film.setDirectors(directorStorageDao.loadFilmDirector(film));
-        }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
     }
 
     public List<Film> getListFilmsDirector(long id, String sort) {
@@ -101,22 +94,14 @@ public class FilmService {
             throw new NotFoundException(String.format("Режиссер с id = %s не найден", id));
         }
         List<Film> films = filmStorageDao.getListFilmsDirector(id, sort);
-        for (Film film : films) {
-            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
-            film.setDirectors(directorStorageDao.loadFilmDirector(film));
-        }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
     }
 
     public List<Film> findMutualFilms(long userId, long friendId) {
         userService.findUserById(userId);
         userService.findUserById(friendId);
         List<Film> films = filmStorageDao.findMutualFilms(userId, friendId);
-        for (Film film : films) {
-            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
-            film.setDirectors(directorStorageDao.loadFilmDirector(film));
-        }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
     }
 
     public List<Film> searchFilms(String query, String by) {
@@ -132,10 +117,13 @@ public class FilmService {
         } else {
             return null;
         }
-        for (Film film : films) {
-            film.setGenres(genreStorageDao.findFilmGenres(film.getId()));
-            film.setDirectors(directorStorageDao.loadFilmDirector(film));
-        }
-        return films;
+        return setGenresAndDirectorsForFilms(films);
+    }
+
+    private List<Film> setGenresAndDirectorsForFilms(List<Film> films) {
+        return films.stream()
+                .peek(f -> f.setGenres(genreStorageDao.findFilmGenres(f.getId())))
+                .peek(f -> f.setDirectors(directorStorageDao.loadFilmDirector(f)))
+                .collect(Collectors.toList());
     }
 }
