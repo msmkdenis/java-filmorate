@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectGenreIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectMpaIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectUserIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ProblematicLikesException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -17,36 +15,21 @@ import javax.validation.ConstraintViolationException;
 @Slf4j
 public class ErrorHandler {
 
-    /*
-    Статусы ошибок:
-    400 — если ошибка валидации: ValidationException (Bad request)
-    404 — для всех ситуаций, если искомый объект не найден (Not Found)
-    500 — если возникло внутреннее исключение (Internal Server Error)
-     */
-
     @ExceptionHandler
-    public ResponseEntity<String> handleUserNotFoundException(final IncorrectUserIdException e) {
-        return new ResponseEntity<>( e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleNotFoundException(final NotFoundException e) {
+        log.info("Возникла ошибка 404: {}", e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
-    public ResponseEntity<String> handleFilmNotFoundException(final IncorrectFilmIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<String> handleMpaNotFoundException(final IncorrectMpaIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<String> handleGenreNotFoundException(final IncorrectGenreIdException e) {
-        return new ResponseEntity<> (e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<String> handleProblematicLikesException(final ProblematicLikesException e) {
+        log.info("Возникла ошибка 409: {}", e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
     public ResponseEntity<String> handleThrowable(final Throwable e) {
-        log.info("Возникла ошибка {}", e.getMessage());
+        log.info("Возникла непредвиденная ошибка {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -59,5 +42,4 @@ public class ErrorHandler {
     public ResponseEntity<String> argumentViolation(final MethodArgumentNotValidException ex){
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
 }

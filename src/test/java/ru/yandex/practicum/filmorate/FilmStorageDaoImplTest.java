@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.IncorrectFilmIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.dao.FilmStorageDao;
@@ -93,6 +93,6 @@ public class FilmStorageDaoImplTest {
         Long filmDeleteId = filmToDelete.getId();
         filmStorageDao.deleteById(filmDeleteId);
 
-        assertThrows(IncorrectFilmIdException.class, () -> filmService.findFilmById(filmDeleteId));
+        assertThrows(NotFoundException.class, () -> filmService.findFilmById(filmDeleteId));
     }
 }

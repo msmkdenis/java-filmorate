@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -14,10 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Slf4j
 @Repository
 public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
 
     public FriendshipStorageDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -42,7 +39,6 @@ public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
                 "SELECT * " +
                         "FROM USERS, FRIENDS " +
                         "WHERE USERS.USER_ID = FRIENDS.FRIEND_ID AND FRIENDS.USER_ID = ?", userId);
-
         return findUsers(sqlQuery);
     }
 
@@ -53,7 +49,6 @@ public class FriendshipStorageDaoImpl implements FriendshipStorageDao {
                         "FROM USERS U, FRIENDS F, FRIENDS O " +
                         "WHERE U.USER_ID = F.FRIEND_ID AND U.USER_ID = O.FRIEND_ID AND F.USER_ID = ? AND O.USER_ID = ?",
                 userId, otherId);
-
         return findUsers(sqlQuery);
     }
 

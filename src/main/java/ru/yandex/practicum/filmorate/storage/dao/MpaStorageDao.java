@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface MpaStorageDao {
 
-    Optional<Mpa> findById(int id);
+    Optional<Mpa> findById(long id);
 
     List<Mpa> findAll();
 }

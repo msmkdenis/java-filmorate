@@ -80,8 +80,8 @@ public class LikeStorageDaoImplTest {
 
         likeStorageDao.addLike(like);
 
-        assertEquals(2, likeStorageDao.findPopularFilms(5).size());
-        assertEquals(secondFilm.getId(), likeStorageDao.findPopularFilms(5).get(0).getId());
+        assertEquals(2, filmStorageDao.findPopularFilms(5).size());
+        assertEquals(secondFilm.getId(), filmStorageDao.findPopularFilms(5).get(0).getId());
         userStorageDao.deleteById(userAddLike.getId());
     }
 
@@ -93,7 +93,7 @@ public class LikeStorageDaoImplTest {
         filmStorageDao.add(firstFilm);
         filmStorageDao.add(secondFilm);
 
-        assertFalse(likeStorageDao.findPopularFilms(10).isEmpty());
+        assertFalse(filmStorageDao.findPopularFilms(10).isEmpty());
         filmStorageDao.deleteById(firstFilm.getId());
         filmStorageDao.deleteById(secondFilm.getId());
     }

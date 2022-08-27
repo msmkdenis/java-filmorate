@@ -1,74 +1,80 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
-import ru.yandex.practicum.filmorate.storage.dao.LikeStorageDao;
-import ru.yandex.practicum.filmorate.storage.dao.MpaStorageDao;
+import ru.yandex.practicum.filmorate.storage.dao.*;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Repository
+@RequiredArgsConstructor
 public class LikeStorageDaoImpl implements LikeStorageDao {
-
     private final JdbcTemplate jdbcTemplate;
-    private final MpaStorageDao mpaStorageDao;
-
-    public LikeStorageDaoImpl(JdbcTemplate jdbcTemplate, MpaStorageDao mpaStorageDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mpaStorageDao = mpaStorageDao;
-    }
-
+    private final FilmStorageDao filmStorageDao;
+    private final GenreStorageDao genreStorageDao;
+    private final DirectorStorageDao directorStorageDao;
+    private final UserStorageDao userStorageDao;
 
     @Override
     public void addLike(Like like) {
-        final String sqlQuery = "INSERT INTO LIKES (USER_ID, FILM_ID) VALUES (?, ?)";
+        final String sqlQuery = "INSERT INTO FILMS_LIKES (USER_ID, FILM_ID) VALUES (?, ?)";
         jdbcTemplate.update(sqlQuery,
                 like.getUser().getId(),
                 like.getFilm().getId());
     }
 
     @Override
+    public List<Like> getLikes(Like like) {
+        String sqlQuery = "SELECT FILMS_LIKES.USER_ID, FILMS_LIKES.FILM_ID " +
+                "FROM FILMS_LIKES " +
+                "WHERE FILMS_LIKES.USER_ID = ? AND FILMS_LIKES.FILM_ID = ? ";
+        return jdbcTemplate.query(sqlQuery, this::makeLocalLike, like.getUser().getId(), like.getFilm().getId());
+    }
+
+    @Override
     public void deleteLike(Like like) {
-        final String sqlQuery = "DELETE FROM LIKES WHERE USER_ID = ? AND FILM_ID = ?";
+        final String sqlQuery = "DELETE FROM FILMS_LIKES WHERE USER_ID = ? AND FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, like.getUser().getId(), like.getFilm().getId());
     }
 
     @Override
-    public List<Film> findPopularFilms(Integer count) {
-        SqlRowSet sqlQuery = jdbcTemplate.queryForRowSet(
-                "SELECT * " +
-                        "FROM FILMS F " +
-                        "LEFT JOIN " +
-                        "(SELECT FILM_ID, " +
-                        "COUNT(*) LIKES_COUNT " +
-                        "FROM LIKES " +
-                        "GROUP BY FILM_ID) " +
-                        "L ON F.FILM_ID = L.FILM_ID " +
-                        "LEFT JOIN MPA ON F.MPA_ID = MPA.MPA_ID " +
-                        "ORDER BY L.LIKES_COUNT DESC LIMIT ?", count);
+    public List<Film> getFilmRecommendations(Long id) {
+        List<Film> recommendations = new ArrayList<>();
+        String sqlQuery = "SELECT L2.USER_ID " +
+                "FROM FILMS_LIKES AS L1 " +
+                "JOIN FILMS_LIKES AS L2 " +
+                "ON L1.FILM_ID = L2.FILM_ID " +
+                "WHERE L1.USER_ID<>L2.USER_ID AND L1.USER_ID = ? " +
+                "GROUP BY L2.USER_ID " +
+                "ORDER BY COUNT(L2.USER_ID) DESC " +
+                "LIMIT 1";
+        List<Long> sameLikesUser = jdbcTemplate.queryForList(sqlQuery, Long.class, id);
+        if (sameLikesUser.size() != 1) {
+            return recommendations;
+        }
+        Long sameLikesUserId = sameLikesUser.get(0);
 
-        return findFilms(sqlQuery);
+        String sqlQuery2 = "SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ? " +
+                "EXCEPT (SELECT FILM_ID FROM FILMS_LIKES WHERE USER_ID = ?)";
+        List<Long> filmDifferences = jdbcTemplate.queryForList(sqlQuery2, Long.class, sameLikesUserId, id);
+        for(Long filmId : filmDifferences) {
+            Film film = filmStorageDao.findById(filmId).get();
+            film.setGenres(genreStorageDao.findFilmGenres(filmId));
+            film.setDirectors(directorStorageDao.loadFilmDirector(film));
+            recommendations.add(film);
+        }
+        return recommendations;
     }
 
-    private List<Film> findFilms(SqlRowSet sqlQuery) {
-        List<Film> films = new ArrayList<>();
-        final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        while (sqlQuery.next()) {
-            Film film = new Film(sqlQuery.getLong("FILM_ID"),
-                    sqlQuery.getString("FILM_NAME"),
-                    sqlQuery.getString("DESCRIPTION"),
-                    LocalDate.parse(Objects.requireNonNull(sqlQuery.getString("RELEASE_DATE")), dtf),
-                    sqlQuery.getInt("DURATION"),
-                    mpaStorageDao.findById(sqlQuery.getInt("MPA_ID")).get());
-            films.add(film);
-        }
-        return films;
+    private Like makeLocalLike(ResultSet rs, int num) throws SQLException {
+        return new Like(
+                userStorageDao.findById(rs.getLong("FILMS_LIKES.USER_ID")).get(),
+                filmStorageDao.findById(rs.getLong("FILMS_LIKES.FILM_ID")).get());
     }
 }

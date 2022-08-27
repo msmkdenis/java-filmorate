@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.IncorrectMpaIdException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaService;
 
@@ -28,6 +28,6 @@ public class MpaStorageDaoImplTest {
     void findByIdTest() {
         Mpa mpa = mpaService.findMpaById(1);
         assertEquals("G", mpa.getName());
-        assertThrows(IncorrectMpaIdException.class, () -> mpaService.findMpaById(-1));
+        assertThrows(NotFoundException.class, () -> mpaService.findMpaById(-1));
     }
 }
